@@ -1,6 +1,6 @@
 [package]
 name = "operon"
-version = "0.6.0"
+version = "0.6.1"
 edition = "2021"
 # FSL-1.1-MIT is not in cargo's strict SPDX list across versions, so we
 # point at the LICENSE file directly. Identifier remains FSL-1.1-MIT.

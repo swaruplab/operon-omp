@@ -55,7 +55,9 @@ pub use report::{
     batch_read_file_previews, batch_read_remote_file_previews, extract_methods_info,
     generate_report_pdf, read_csv_for_report, scan_project_files, scan_remote_project_files,
 };
-pub use settings::{get_settings, start_dictation, stop_dictation, update_settings};
+pub use settings::{
+    detect_ollama_models, get_settings, start_dictation, stop_dictation, update_settings,
+};
 pub use setup::{
     check_ollama, check_opencode, check_vllm, complete_setup, install_ollama, install_opencode,
 };

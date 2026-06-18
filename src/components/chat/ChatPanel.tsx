@@ -591,9 +591,11 @@ function WorkingSection({ thinkingText, tools, isActive }: {
         </div>
       )}
 
-      {/* Thinking section: collapsed by default */}
+      {/* Reasoning section: auto-expanded while the turn is streaming so the
+          agent's thought process is visible live; collapses once the turn ends
+          (one click to reopen). */}
       {thinkingText && (
-        <details className="my-1 rounded-lg border border-purple-900/30 overflow-hidden group">
+        <details open={isActive} className="my-1 rounded-lg border border-purple-900/30 overflow-hidden group">
           <summary className="flex items-center gap-2 px-2.5 py-1 text-[11px] text-purple-400/60 cursor-pointer hover:bg-purple-950/20 bg-zinc-900/30">
             <ChevronRight className="w-3 h-3 shrink-0 group-open:rotate-90 transition-transform" />
             <span>Reasoning</span>
@@ -1001,6 +1003,14 @@ export function ChatPanel() {
   const [sessionId, setSessionId] = useState(() => crypto.randomUUID());
   const [agentSessionId, setAgentSessionId] = useState<string | null>(null);
   const [model, setModel] = useState('ollama/kimi-k2.6:cloud');
+  const [ollamaModels, setOllamaModels] = useState<string[]>([]);
+
+  // Populate the model picker from the running Ollama daemon (not a hardcoded list).
+  useEffect(() => {
+    invoke<string[]>('detect_ollama_models', { refresh: false })
+      .then(setOllamaModels)
+      .catch(() => {});
+  }, []);
 
   // Load default model from user settings
   useEffect(() => {
@@ -2930,12 +2940,14 @@ You are running on an HPC cluster via an SSH connection. Follow these rules stri
           className="flex-1 bg-zinc-900 border border-zinc-800 rounded px-2 py-1 text-xs text-zinc-400 outline-none"
         >
           <optgroup label="Local (Ollama)">
-            <option value="ollama/kimi-k2.6:cloud">ollama/kimi-k2.6:cloud</option>
-            <option value="ollama/qwen2.5-coder:7b">ollama/qwen2.5-coder:7b</option>
-            <option value="ollama/qwen2.5-coder:32b">ollama/qwen2.5-coder:32b</option>
-            <option value="ollama/llama3.1:8b">ollama/llama3.1:8b</option>
-            <option value="ollama/llama3.1:70b">ollama/llama3.1:70b</option>
-            <option value="ollama/deepseek-coder-v2:16b">ollama/deepseek-coder-v2:16b</option>
+            {(() => {
+              const opts = ollamaModels.map((m) => `ollama/${m}`);
+              if (model && !opts.includes(model)) opts.unshift(model);
+              if (opts.length === 0) opts.push(model || 'ollama/llama3.1:8b');
+              return opts.map((v) => (
+                <option key={v} value={v}>{v}</option>
+              ));
+            })()}
           </optgroup>
         </select>
       </div>

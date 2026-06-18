@@ -273,6 +273,25 @@ export function SettingsPanel({ isOpen, onClose, initialSection }: SettingsPanel
     setExtSettingsLoading(false);
   }, []);
 
+  const [ollamaModels, setOllamaModels] = useState<string[]>([]);
+  const [detectingModels, setDetectingModels] = useState(false);
+
+  const detectModels = useCallback(async (refresh: boolean) => {
+    setDetectingModels(true);
+    try {
+      const models = await invoke<string[]>('detect_ollama_models', { refresh });
+      setOllamaModels(models);
+    } catch (e) {
+      console.error('Failed to detect Ollama models:', e);
+    } finally {
+      setDetectingModels(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isOpen) detectModels(false);
+  }, [isOpen, detectModels]);
+
   useEffect(() => {
     if (isOpen) {
       invoke<AppSettings>('get_settings')
@@ -516,23 +535,41 @@ export function SettingsPanel({ isOpen, onClose, initialSection }: SettingsPanel
                 </p>
               </div>
 
-              <label className="flex items-center justify-between">
-                <span className="text-sm text-zinc-400">Default Model</span>
-                <select
-                  value={settings.model}
-                  onChange={(e) => saveSettings({ ...settings, model: e.target.value })}
-                  className="w-56 px-2 py-1 bg-zinc-800 border border-zinc-700 rounded text-sm text-zinc-100 outline-none"
-                >
-                  <optgroup label="Local (Ollama)">
-                    <option value="ollama/kimi-k2.6:cloud">kimi-k2.6:cloud</option>
-                    <option value="ollama/qwen2.5-coder:7b">qwen2.5-coder:7b</option>
-                    <option value="ollama/qwen2.5-coder:32b">qwen2.5-coder:32b</option>
-                    <option value="ollama/llama3.1:8b">llama3.1:8b</option>
-                    <option value="ollama/llama3.1:70b">llama3.1:70b</option>
-                    <option value="ollama/deepseek-coder-v2:16b">deepseek-coder-v2:16b</option>
-                  </optgroup>
-                </select>
-              </label>
+              <div>
+                <label className="flex items-center justify-between">
+                  <span className="text-sm text-zinc-400">Default Model</span>
+                  <select
+                    value={settings.model}
+                    onChange={(e) => saveSettings({ ...settings, model: e.target.value })}
+                    className="w-56 px-2 py-1 bg-zinc-800 border border-zinc-700 rounded text-sm text-zinc-100 outline-none"
+                  >
+                    <optgroup label="Local (Ollama)">
+                      {(() => {
+                        const opts = ollamaModels.map((m) => `ollama/${m}`);
+                        if (settings.model && !opts.includes(settings.model)) opts.unshift(settings.model);
+                        if (opts.length === 0) opts.push(settings.model || 'ollama/llama3.1:8b');
+                        return opts.map((v) => (
+                          <option key={v} value={v}>{v.replace(/^ollama\//, '')}</option>
+                        ));
+                      })()}
+                    </optgroup>
+                  </select>
+                </label>
+                <div className="flex items-center justify-end gap-2 mt-1.5">
+                  <span className="text-[11px] text-zinc-500">
+                    {detectingModels
+                      ? 'Detecting models...'
+                      : `${ollamaModels.length} model${ollamaModels.length === 1 ? '' : 's'} from Ollama`}
+                  </span>
+                  <button
+                    onClick={() => detectModels(true)}
+                    disabled={detectingModels}
+                    className="text-[11px] px-2 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 disabled:opacity-50"
+                  >
+                    Detect models
+                  </button>
+                </div>
+              </div>
 
               <label className="flex items-center justify-between">
                 <span className="text-sm text-zinc-400">Max Turns</span>

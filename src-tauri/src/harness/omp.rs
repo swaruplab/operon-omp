@@ -55,6 +55,11 @@ use super::{BuildContext, BuildOutput, Capabilities, HarnessAdapter};
 /// rule so the agent registers long SLURM jobs with the watchdog instead of
 /// blocking the turn on `squeue`.
 const HEADLESS_RULES: &str = "OPERON RUNTIME RULES (non-interactive):\n\
+    - OUTPUT LOCATION (critical): write EVERY file you create — scripts, results, figures, data, \
+    websites — into the CURRENT WORKING DIRECTORY (the project folder you were launched in; run \
+    `pwd` if unsure) using relative paths. NEVER write to /tmp or create your own temporary/scratch \
+    directory: the user only sees the project folder, so anything written elsewhere is invisible to \
+    them and effectively lost.\n\
     - You run headless: stdout is captured, there is no TTY and no interactive UI. \
     Never wait for keyboard input or a display. Render plots/files to disk, do not open windows.\n\
     - Long-running or batch jobs (e.g. SLURM `sbatch`): submit the job, report the job id, then \
@@ -338,7 +343,11 @@ impl HarnessAdapter for OmpAdapter {
         // -p + --mode json => non-interactive JSONL event stream, then exit.
         // --auto-approve => never block on an approval prompt (headless); the
         //   permission tier is enforced via the system prompt + guardrail hooks.
-        let mut cmd = String::from("omp --mode json -p --auto-approve");
+        // --allow-home stops omp from auto-relocating to a temp dir when the
+        // project folder is (or resolves to) $HOME — outputs must land in the
+        // user's working folder (the launch cwd), which is the only place the
+        // Operon file explorer shows them.
+        let mut cmd = String::from("omp --mode json -p --auto-approve --allow-home");
         if let Some(m) = ctx.model {
             cmd.push_str(&format!(" --model '{}'", shq(m)));
         }

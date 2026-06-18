@@ -469,12 +469,11 @@ function LocalFileExplorer({ localTerminalId }: LocalFileExplorerProps) {
   };
 
   const navigateTo = (path: string) => {
+    // Just update the shared project path; the projectPath effect below
+    // auto-cds the active terminal. Routing the cd through the effect (instead
+    // of only here) means the go-to-folder path bar and any other
+    // setProjectPath caller stay in sync too — not just tree navigation.
     setProjectPath(path);
-    // Auto-cd terminal unless this navigation was triggered by terminal sync
-    if (!syncedFromTerminal.current) {
-      cdToTerminalPath(path);
-    }
-    syncedFromTerminal.current = false;
   };
 
   const navigateUp = () => {
@@ -501,6 +500,21 @@ function LocalFileExplorer({ localTerminalId }: LocalFileExplorerProps) {
     });
     return () => { unlisten.then((u) => u()); };
   }, [setProjectPath]);
+
+  // Explorer → terminal sync: cd the active terminal whenever the project
+  // folder changes (tree navigation, the go-to-folder path bar, or any other
+  // setProjectPath caller). Skipped when the change originated FROM the
+  // terminal's own cwd, to avoid a feedback loop. Mirrors RemoteExplorer.
+  const prevProjectPath = useRef(projectPath);
+  useEffect(() => {
+    if (projectPath && projectPath !== prevProjectPath.current) {
+      prevProjectPath.current = projectPath;
+      if (!syncedFromTerminal.current) {
+        cdToTerminalPath(projectPath);
+      }
+      syncedFromTerminal.current = false;
+    }
+  }, [projectPath, localTerminalId]);
 
   const folderName = projectPath?.split('/').pop() || 'Project';
 

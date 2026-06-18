@@ -177,6 +177,58 @@ pub async fn update_settings(
     Ok(())
 }
 
+fn resolve_omp_bin() -> String {
+    if let Some(home) = dirs::home_dir() {
+        let p = home.join(".local").join("bin").join("omp");
+        if p.exists() {
+            return p.to_string_lossy().to_string();
+        }
+    }
+    "omp".to_string()
+}
+
+/// List the models available from the local Ollama daemon, for the model picker.
+/// When `refresh` is true, first runs `omp models refresh` so a model the user
+/// just pulled becomes BOTH visible here and usable by the OMP engine (OMP keeps
+/// its own catalog cache that otherwise lags newly-pulled Ollama models).
+#[tauri::command]
+pub async fn detect_ollama_models(refresh: bool) -> Result<Vec<String>, String> {
+    if refresh {
+        let omp = resolve_omp_bin();
+        let _ = tokio::time::timeout(
+            std::time::Duration::from_secs(20),
+            tokio::process::Command::new(&omp)
+                .args(["models", "refresh"])
+                .kill_on_drop(true)
+                .output(),
+        )
+        .await;
+    }
+    let client = reqwest::Client::builder()
+        .timeout(std::time::Duration::from_secs(5))
+        .build()
+        .map_err(|e| e.to_string())?;
+    let resp = client
+        .get("http://localhost:11434/api/tags")
+        .send()
+        .await
+        .map_err(|e| {
+            format!("Couldn't reach Ollama at localhost:11434 ({e}). Is the Ollama app running?")
+        })?;
+    let json: serde_json::Value = resp.json().await.map_err(|e| e.to_string())?;
+    let mut models: Vec<String> = json
+        .get("models")
+        .and_then(|m| m.as_array())
+        .map(|arr| {
+            arr.iter()
+                .filter_map(|m| m.get("name").and_then(|n| n.as_str()).map(String::from))
+                .collect()
+        })
+        .unwrap_or_default();
+    models.sort();
+    Ok(models)
+}
+
 /// Start platform-native speech recognition.
 /// On macOS: uses SFSpeechRecognizer + AVAudioEngine via a Swift subprocess.
 /// On other platforms: returns an error (dictation not supported).

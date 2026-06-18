@@ -4,6 +4,29 @@ All notable changes to Operon are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project
 follows [Semantic Versioning](https://semver.org/).
 
+## [0.6.1] — 2026-06-17
+
+The **OMP engine release**: Operon's agent brain is swapped from OpenCode to
+**OMP (oh-my-pi)** — a more autonomous, multi-provider agent — behind the
+existing `HarnessAdapter` seam, plus a round of UX fixes.
+
+### Added
+- **OMP agent engine** (`src-tauri/src/harness/omp.rs`): one-shot `omp --mode json`
+  adapter with event-schema mapping verified against the real binary; model-role
+  routing + fallback chains and a destructive-op guardrail hook auto-generated in
+  `~/.omp/`.
+- `agent_engine` setting + a Settings engine selector (OMP default; OpenCode kept
+  for one-flag rollback).
+- Dynamic model pickers — the in-chat and Settings dropdowns now populate from the
+  running Ollama daemon (new `detect_ollama_models` command + `omp models refresh`),
+  replacing the hardcoded list.
+
+### Changed / Fixed
+- Agent reasoning now auto-expands while streaming, so the thought process is visible.
+- Explorer ↔ Terminal sync: changing the folder in the explorer cds the active terminal.
+- The agent writes outputs to the working folder (not `/tmp`) via `--allow-home`
+  and a system-prompt output-location rule.
+
 ## [0.6.0] — 2026-05-01
 
 This release focuses on **HPC reliability** (no more "are you working?" check-ins

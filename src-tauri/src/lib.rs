@@ -63,6 +63,7 @@ use commands::{
     get_remote_home,
     get_server_config,
     // Settings & System
+    detect_ollama_models,
     get_settings,
     // Terminal
     get_terminal_cwd,
@@ -315,6 +316,7 @@ pub fn run() {
             check_control_master,
             stop_control_master,
             // Settings
+            detect_ollama_models,
             get_settings,
             update_settings,
             // Setup wizard
