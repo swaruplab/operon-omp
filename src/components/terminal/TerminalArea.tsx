@@ -1,0 +1,262 @@
+import { useState, useCallback, useEffect, useRef } from 'react';
+import { Plus, X, Terminal as TerminalIcon } from 'lucide-react';
+import { listen, emit } from '@tauri-apps/api/event';
+import { invoke } from '@tauri-apps/api/core';
+import { TerminalInstance } from './TerminalInstance';
+import { Tooltip } from '../ui/Tooltip';
+
+interface TerminalTab {
+  id: string;
+  title: string;
+  type: 'local' | 'ssh';
+  /** Command to run once the shell is ready (e.g. an SSH command) */
+  initialCommand?: string;
+  /** SSH profile id — present for SSH tabs, enables HPC watchdog auto-register. */
+  sshProfileId?: string;
+  exited: boolean;
+}
+
+export function TerminalArea() {
+  const [tabs, setTabs] = useState<TerminalTab[]>(() => {
+    const id = crypto.randomUUID();
+    return [{ id, title: 'Terminal', type: 'local', exited: false }];
+  });
+  const [activeTab, setActiveTab] = useState<string>(() => tabs[0].id);
+
+  // Listen for SSH terminal open events from the sidebar
+  useEffect(() => {
+    const unlisten = listen<{ terminalId: string; title: string; sshCommand?: string; profileId?: string }>('open-ssh-terminal', (event) => {
+      const { terminalId, title, sshCommand, profileId } = event.payload;
+      const newTab: TerminalTab = {
+        id: terminalId,
+        title,
+        type: 'ssh',
+        initialCommand: sshCommand,
+        sshProfileId: profileId,
+        exited: false,
+      };
+      setTabs((prev) => [...prev, newTab]);
+      setActiveTab(terminalId);
+    });
+
+    return () => { unlisten.then((u) => u()); };
+  }, []);
+
+  // Listen for disconnect-remote events: kill all SSH tabs for this profile
+  // so the user can cleanly switch to a different server.
+  useEffect(() => {
+    const unlisten = listen<{ profileId: string }>('disconnect-remote', (event) => {
+      const { profileId } = event.payload;
+      setTabs((prev) => {
+        const toClose = prev.filter((t) => t.type === 'ssh' && t.sshProfileId === profileId);
+        toClose.forEach((t) => {
+          invoke('kill_terminal', { terminalId: t.id }).catch(() => {});
+        });
+        const remaining = prev.filter((t) => !toClose.includes(t));
+        // If the active tab was closed, focus a remaining tab (or none)
+        setActiveTab((curr) =>
+          toClose.some((t) => t.id === curr)
+            ? remaining[remaining.length - 1]?.id ?? curr
+            : curr,
+        );
+        return remaining;
+      });
+    });
+    return () => { unlisten.then((u) => u()); };
+  }, []);
+
+  // Listen for login terminal open events (opencode auth login)
+  useEffect(() => {
+    const unlisten = listen<{ terminalId: string; title: string; command: string }>('open-login-terminal', (event) => {
+      const { terminalId, title, command } = event.payload;
+      const newTab: TerminalTab = {
+        id: terminalId,
+        title,
+        type: 'local',
+        initialCommand: command,
+        exited: false,
+      };
+      setTabs((prev) => [...prev, newTab]);
+      setActiveTab(terminalId);
+    });
+
+    return () => { unlisten.then((u) => u()); };
+  }, []);
+
+  // Emit the active local terminal ID so the file explorer can use it for cd
+  useEffect(() => {
+    const activeTabObj = tabs.find((t) => t.id === activeTab);
+    if (activeTabObj && activeTabObj.type === 'local' && !activeTabObj.exited) {
+      emit('local-terminal-active', { terminalId: activeTabObj.id });
+    }
+  }, [activeTab, tabs]);
+
+  // --- CWD tracking for terminals (terminal → explorer sync) ---
+  const lastCwd = useRef<string>('');
+  const lastRemoteCwd = useRef<string>('');
+
+  const handleCwdChange = useCallback((id: string, cwd: string) => {
+    const tab = tabs.find((t) => t.id === id);
+    if (!tab || !cwd) return;
+    if (tab.type === 'local') {
+      if (cwd !== lastCwd.current) {
+        lastCwd.current = cwd;
+        emit('terminal-cwd-changed', { terminalId: id, cwd });
+      }
+    } else {
+      if (cwd !== lastRemoteCwd.current) {
+        lastRemoteCwd.current = cwd;
+        emit('remote-terminal-cwd-changed', { terminalId: id, cwd });
+      }
+    }
+  }, [tabs]);
+
+  // Fallback: poll via lsof for shells that don't emit OSC 7
+  useEffect(() => {
+    const activeTabObj = tabs.find((t) => t.id === activeTab);
+    if (!activeTabObj || activeTabObj.type !== 'local' || activeTabObj.exited) {
+      return;
+    }
+
+    const pollCwd = async () => {
+      try {
+        const cwd = await invoke<string>('get_terminal_cwd', { terminalId: activeTabObj.id });
+        handleCwdChange(activeTabObj.id, cwd);
+      } catch {
+        // Terminal may have exited or CWD detection not supported
+      }
+    };
+
+    // Poll every 3 seconds as fallback (OSC 7 is the primary mechanism)
+    const interval = setInterval(pollCwd, 3000);
+    pollCwd();
+
+    return () => clearInterval(interval);
+  }, [activeTab, tabs, handleCwdChange]);
+
+  const createTab = useCallback((type: 'local' | 'ssh' = 'local') => {
+    const id = crypto.randomUUID();
+    const newTab: TerminalTab = {
+      id,
+      title: type === 'local' ? 'Terminal' : 'SSH',
+      type,
+      exited: false,
+    };
+    setTabs((prev) => [...prev, newTab]);
+    setActiveTab(id);
+  }, []);
+
+  const closeTab = useCallback(
+    (id: string) => {
+      // Explicitly kill the backend terminal process when user closes the tab
+      invoke('kill_terminal', { terminalId: id }).catch(console.error);
+      setTabs((prev) => {
+        const filtered = prev.filter((t) => t.id !== id);
+        if (activeTab === id && filtered.length > 0) {
+          setActiveTab(filtered[filtered.length - 1].id);
+        }
+        return filtered;
+      });
+    },
+    [activeTab],
+  );
+
+  const handleTitleChange = useCallback((id: string, title: string) => {
+    setTabs((prev) =>
+      prev.map((t) => (t.id === id ? { ...t, title: title || 'Terminal' } : t)),
+    );
+  }, []);
+
+  const handleExit = useCallback((id: string) => {
+    setTabs((prev) =>
+      prev.map((t) => (t.id === id ? { ...t, exited: true } : t)),
+    );
+  }, []);
+
+  // If all tabs closed, show empty state
+  if (tabs.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full bg-[#09090b] text-zinc-500">
+        <TerminalIcon className="w-8 h-8 mb-2 opacity-40" />
+        <p className="text-xs">No terminals open</p>
+        <button
+          onClick={() => createTab()}
+          className="mt-2 px-3 py-1 text-xs rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 transition-colors"
+        >
+          New Terminal
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col h-full bg-[#09090b]">
+      {/* Tab bar */}
+      <div className="flex items-center h-[33px] bg-zinc-900 border-b border-zinc-800 shrink-0">
+
+        <div className="flex items-center gap-0.5 px-1 flex-1 overflow-x-auto">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`
+                group flex items-center gap-1.5 px-2.5 py-1 rounded text-xs transition-colors
+                ${
+                  activeTab === tab.id
+                    ? 'bg-zinc-800 text-zinc-200'
+                    : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/50'
+                }
+              `}
+            >
+              <TerminalIcon className="w-3 h-3" />
+              <span className={tab.exited ? 'line-through opacity-50' : ''}>
+                {tab.title}
+              </span>
+              <span
+                onClick={(e) => {
+                  e.stopPropagation();
+                  closeTab(tab.id);
+                }}
+                className="p-0.5 rounded hover:bg-zinc-700 opacity-0 group-hover:opacity-100"
+              >
+                <X className="w-2.5 h-2.5" />
+              </span>
+            </button>
+          ))}
+        </div>
+
+        <div className="flex items-center gap-0.5 mr-1">
+          <Tooltip label="New terminal" position="top">
+            <button
+              onClick={() => createTab()}
+              className="p-1.5 rounded hover:bg-zinc-800 text-zinc-500 hover:text-zinc-300 transition-colors"
+            >
+              <Plus className="w-3.5 h-3.5" />
+            </button>
+          </Tooltip>
+        </div>
+      </div>
+
+      {/* Terminal instances — all rendered, only active visible */}
+      <div className="flex-1 relative">
+        {tabs.map((tab) => (
+          <div
+            key={tab.id}
+            className="absolute inset-0"
+            style={{ zIndex: activeTab === tab.id ? 1 : 0 }}
+          >
+            <TerminalInstance
+              terminalId={tab.id}
+              isVisible={activeTab === tab.id}
+              initialCommand={tab.initialCommand}
+              sshProfileId={tab.sshProfileId}
+              onTitleChange={(title) => handleTitleChange(tab.id, title)}
+              onExit={() => handleExit(tab.id)}
+              onCwdChange={(cwd) => handleCwdChange(tab.id, cwd)}
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}

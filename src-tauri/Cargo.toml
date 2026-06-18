@@ -1,0 +1,35 @@
+[package]
+name = "operon"
+version = "0.6.0"
+edition = "2021"
+# FSL-1.1-MIT is not in cargo's strict SPDX list across versions, so we
+# point at the LICENSE file directly. Identifier remains FSL-1.1-MIT.
+license-file = "../LICENSE"
+
+[lib]
+name = "operon_lib"
+crate-type = ["lib", "cdylib", "staticlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-shell = "2"
+tauri-plugin-updater = "2"
+tauri-plugin-process = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["full"] }
+uuid = { version = "1", features = ["v4"] }
+anyhow = "1"
+thiserror = "1"
+dirs = "5"
+portable-pty = "0.8"
+base64 = "0.22"
+ssh2 = "0.9"
+openssl-sys = { version = "0.9", features = ["vendored"] }
+reqwest = { version = "0.12", features = ["json", "stream", "rustls-tls"], default-features = false }
+zip = "0.6"
+futures-util = "0.3"
+regex = "1"

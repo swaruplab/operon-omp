@@ -1,0 +1,75 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+src-tauri/target/
+
+# macOS
+.DS_Store
+*.dmg
+
+# Signing credentials — NEVER commit these
+build-signed.sh
+build-intel.sh
+build-universal.sh
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment / secrets
+.env
+.env.*
+credentials.json
+*.keychain
+
+# Logs
+*.log
+npm-debug.log*
+
+# Tauri dev artifacts
+src-tauri/gen/
+
+# Planning artifacts
+implementation_plan.md
+GitHub-skills.md
+
+# Screenshots (raw — curated versions are in docs/img/)
+screenshots/
+
+# OS files
+Thumbs.db
+Desktop.ini
+
+# Operon session temp files
+.operon-*.jsonl
+.operon-*.done
+.operon/
+
+# Vendored sidecar binaries — fetched by scripts/fetch-ripgrep.sh,
+# also fetched on CI before each build. Not checked in to keep repo lean.
+src-tauri/binaries/
+
+# Local working scratch dirs (Dropbox sync, audit output, mount points)
+tmp/
+mnt/
+operon/
+
+# Knowledge graph artifacts — regenerable via `graphify update .`
+graphify-out/
+
+# Claude Code session state and per-project auto-memory
+.claude/
+memory/
+
+# Shell dotfiles that occasionally land here from Dropbox sync
+.bash_logout
+.bashrc
+.profile
+
+# Visual Studio Copilot snapshots (cruft)
+.vs/

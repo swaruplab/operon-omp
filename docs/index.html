@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0a0a0c">
+<title>Operon — The IDE that runs your experiments</title>
+<meta name="description" content="Operon pairs Claude with your lab's HPC, 180+ analysis protocols, an MCP research catalog, and a private-LLM stack — so the only thing you write is the question.">
+<meta property="og:title" content="Operon — The IDE that runs your experiments">
+<meta property="og:description" content="An AI-native desktop IDE built for computational biology. Mac, Windows, Linux.">
+<meta property="og:image" content="img/main-workspace.png">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════
+     NAV
+     ═══════════════════════════════════════════════════════ -->
+<nav class="nav" aria-label="Primary">
+  <div class="wrap-wide nav-inner">
+    <a href="index.html" class="brand">
+      <span class="brand-dot"></span> Operon
+    </a>
+    <ul class="nav-links" role="menu">
+      <li><a href="protocols.html">Protocols</a></li>
+      <li><a href="mcp.html">MCP</a></li>
+      <li><a href="private-llm.html">Private LLM</a></li>
+      <li><a href="hpc.html">HPC</a></li>
+      <li><a href="tutorials.html">Tutorials</a></li>
+      <li><a href="guide.html">Docs</a></li>
+      <li><a href="https://github.com/swaruplab/operon" target="_blank" rel="noopener">GitHub</a></li>
+    </ul>
+    <button type="button" class="theme-toggle" data-theme-toggle aria-label="Toggle light/dark theme" title="Toggle theme">
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+    </button>
+    <a href="download.html" class="nav-cta">Download</a>
+    <button class="nav-toggle" aria-label="Toggle menu">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════
+     HERO
+     ═══════════════════════════════════════════════════════ -->
+<header class="section section-grad" style="padding-top: clamp(80px, 14vw, 160px); padding-bottom: 48px;">
+  <div class="wrap-wide text-center">
+    <span class="eyebrow reveal">Bioinformatics, re-imagined</span>
+    <h1 class="reveal" style="margin-top: 18px;">
+      The IDE that runs<br>your experiments.
+    </h1>
+    <p class="lead reveal" style="margin: 28px auto 40px; font-size: clamp(1.1rem, 1.8vw, 1.35rem); max-width: 60ch; text-align: center;">
+      Operon pairs Claude with your lab's HPC, <span data-protocol-count>180+</span> analysis protocols, an MCP research catalog, and a private-LLM stack — so the only thing you write is the question.
+    </p>
+
+    <div class="row reveal" style="justify-content: center; gap: 14px;">
+      <div class="download-menu">
+        <a href="#" class="btn-split" data-download-trigger>
+          <span class="main" data-download="primary">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v13M6 11l6 6 6-6M4 21h16"/></svg>
+            <span data-download-label>Download for Mac</span>
+          </span>
+          <span class="chev" aria-label="Other platforms">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+          </span>
+        </a>
+        <div class="download-panel" role="menu">
+          <a data-dl="dl-apple-silicon" href="#">
+            <span class="os">
+              <svg class="os-ic" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.37 1.43c.07.9-.24 1.78-.8 2.44-.6.7-1.53 1.24-2.44 1.17-.09-.9.36-1.84.88-2.4.6-.7 1.63-1.2 2.36-1.2zm3.43 16.32c-.6 1.34-.88 1.94-1.65 3.13-1.07 1.66-2.59 3.73-4.47 3.75-1.67.02-2.1-1.09-4.37-1.07-2.28.02-2.75 1.1-4.42 1.08-1.88-.02-3.32-1.9-4.39-3.56C-.28 17.57-.58 12.03 1.35 9.17c1.37-2.03 3.53-3.22 5.56-3.22 2.07 0 3.37 1.14 5.08 1.14 1.66 0 2.67-1.14 5.06-1.14 1.81 0 3.72.99 5.08 2.69-4.46 2.44-3.74 8.82-1.33 9.11z"/></svg>
+              macOS · Apple Silicon
+            </span>
+            <span class="arch">.dmg · arm64</span>
+          </a>
+          <a data-dl="dl-intel" href="#">
+            <span class="os">
+              <svg class="os-ic" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.37 1.43c.07.9-.24 1.78-.8 2.44-.6.7-1.53 1.24-2.44 1.17-.09-.9.36-1.84.88-2.4.6-.7 1.63-1.2 2.36-1.2zm3.43 16.32c-.6 1.34-.88 1.94-1.65 3.13-1.07 1.66-2.59 3.73-4.47 3.75-1.67.02-2.1-1.09-4.37-1.07-2.28.02-2.75 1.1-4.42 1.08-1.88-.02-3.32-1.9-4.39-3.56C-.28 17.57-.58 12.03 1.35 9.17c1.37-2.03 3.53-3.22 5.56-3.22 2.07 0 3.37 1.14 5.08 1.14 1.66 0 2.67-1.14 5.06-1.14 1.81 0 3.72.99 5.08 2.69-4.46 2.44-3.74 8.82-1.33 9.11z"/></svg>
+              macOS · Intel
+            </span>
+            <span class="arch">.dmg · x64</span>
+          </a>
+          <a data-dl="dl-windows" href="#">
+            <span class="os">
+              <svg class="os-ic" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 5.5 11 4v7H3V5.5zM12 4l9-1.5V11h-9V4zM3 12h8v7L3 17.5V12zm9 0h9v8.5L12 19v-7z"/></svg>
+              Windows 10 / 11
+            </span>
+            <span class="arch">.exe · x64</span>
+          </a>
+          <a data-dl="dl-linux-deb" href="#">
+            <span class="os">
+              <svg class="os-ic" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a5 5 0 0 0-4.86 6.18c-.12.55-.4 1.01-.84 1.4-.86.75-1.3 1.53-1.3 2.61 0 1.1.42 1.9 1.02 2.65.47.58.7 1.04.62 1.64-.06.43-.3.92-.62 1.3-.32.38-.52.78-.52 1.22 0 1.1 1.34 1.5 3.5 1.5.8 0 1.5-.2 2.5-.5.97-.3 1.5-.5 2.5-.5s1.53.2 2.5.5c1 .3 1.7.5 2.5.5 2.16 0 3.5-.4 3.5-1.5 0-.44-.2-.84-.52-1.22-.32-.38-.56-.87-.62-1.3-.08-.6.15-1.06.62-1.64.6-.75 1.02-1.55 1.02-2.65 0-1.08-.44-1.86-1.3-2.61-.44-.39-.72-.85-.84-1.4A5 5 0 0 0 12 2z"/></svg>
+              Linux · Debian / Ubuntu
+            </span>
+            <span class="arch">.deb · x64</span>
+          </a>
+          <a data-dl="dl-linux-appimage" href="#">
+            <span class="os">
+              <svg class="os-ic" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a5 5 0 0 0-4.86 6.18c-.12.55-.4 1.01-.84 1.4-.86.75-1.3 1.53-1.3 2.61 0 1.1.42 1.9 1.02 2.65.47.58.7 1.04.62 1.64-.06.43-.3.92-.62 1.3-.32.38-.52.78-.52 1.22 0 1.1 1.34 1.5 3.5 1.5.8 0 1.5-.2 2.5-.5.97-.3 1.5-.5 2.5-.5s1.53.2 2.5.5c1 .3 1.7.5 2.5.5 2.16 0 3.5-.4 3.5-1.5 0-.44-.2-.84-.52-1.22-.32-.38-.56-.87-.62-1.3-.08-.6.15-1.06.62-1.64.6-.75 1.02-1.55 1.02-2.65 0-1.08-.44-1.86-1.3-2.61-.44-.39-.72-.85-.84-1.4A5 5 0 0 0 12 2z"/></svg>
+              Linux · AppImage
+            </span>
+            <span class="arch">.AppImage · x64</span>
+          </a>
+        </div>
+      </div>
+      <a href="tutorials.html" class="btn btn-ghost btn-lg btn-video">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="7 5 21 12 7 19 7 5" fill="currentColor"/></svg>
+        Watch a biologist use it
+      </a>
+    </div>
+
+    <div class="row reveal" style="justify-content: center; margin-top: 36px; gap: 10px;">
+      <span class="pill"><span class="pill-dot"></span> <span data-version>v0.5.9</span> · released this month</span>
+      <span class="pill">macOS · Windows · Linux</span>
+      <span class="pill">MIT · open-source</span>
+      <span class="pill"><span data-count-to="180" data-count-suffix="+">180+</span> protocols</span>
+      <span class="pill"><span data-count-to="12" data-count-suffix="+">12+</span> MCPs</span>
+      <span class="pill"><span data-count-to="40" data-count-suffix="+">40+</span> LLM backends</span>
+      <span class="gh-chip" aria-label="GitHub stats" style="margin-left: 4px;">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5C5.65.5.5 5.65.5 12a11.5 11.5 0 0 0 7.86 10.92c.57.1.78-.25.78-.55v-1.94c-3.2.7-3.87-1.54-3.87-1.54-.52-1.33-1.28-1.68-1.28-1.68-1.04-.72.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.02 1.76 2.69 1.25 3.35.96.1-.74.4-1.25.72-1.54-2.55-.29-5.23-1.28-5.23-5.69 0-1.26.45-2.28 1.18-3.09-.12-.29-.51-1.46.11-3.05 0 0 .97-.31 3.17 1.18.92-.25 1.9-.38 2.88-.38.98 0 1.96.13 2.88.38 2.2-1.49 3.17-1.18 3.17-1.18.62 1.59.23 2.76.11 3.05.74.81 1.18 1.83 1.18 3.09 0 4.42-2.69 5.39-5.25 5.68.41.36.78 1.06.78 2.13v3.16c0 .3.21.66.79.55A11.5 11.5 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5z"/></svg>
+        <span data-gh-stars>★</span>
+        <span class="gh-sep"></span>
+        <span data-gh-release>v0.5.9</span>
+      </span>
+    </div>
+  </div>
+
+  <div class="wrap-wide" style="margin-top: clamp(56px, 8vw, 88px);">
+    <figure class="reveal hero-showcase" aria-label="Feature tour — workspace, AI modes, protocols, PubMed, HPC">
+      <div class="hs-stage">
+        <img src="img/main-workspace.png" alt="The Operon workspace — file explorer, Monaco editor, terminal, and Claude chat in one window">
+        <img src="img/tour-ai-modes.png" alt="Four AI modes: Agent, Plan, Ask, and Report">
+        <img src="img/protocols1.png" alt="Built-in catalog of 180+ bioinformatics protocols">
+        <img src="img/pubmed-toggle.png" alt="Ask mode with PubMed toggle — literature-grounded answers">
+        <img src="img/tour-hpc.png" alt="Operon running on an HPC compute node over SSH">
+      </div>
+      <figcaption class="hs-captions" aria-hidden="true">
+        <span class="hs-cap" data-slide="0"><strong>The workspace</strong> — editor, terminal, and Claude in one window.</span>
+        <span class="hs-cap" data-slide="1"><strong>Four AI modes</strong> — Agent, Plan, Ask, Report · one keystroke.</span>
+        <span class="hs-cap" data-slide="2"><strong>180+ protocols</strong> — scRNA-seq, ATAC, ChIP, bulk, spatial.</span>
+        <span class="hs-cap" data-slide="3"><strong>PubMed-grounded Q&amp;A</strong> — cited DOIs, no API key.</span>
+        <span class="hs-cap" data-slide="4"><strong>HPC-native</strong> — run on your cluster, not your laptop.</span>
+      </figcaption>
+      <div class="hs-chips" aria-label="Feature tour progress">
+        <button type="button" class="hs-chip" data-slide="0">Workspace</button>
+        <button type="button" class="hs-chip" data-slide="1">4 AI modes</button>
+        <button type="button" class="hs-chip" data-slide="2">Protocols</button>
+        <button type="button" class="hs-chip" data-slide="3">PubMed Q&amp;A</button>
+        <button type="button" class="hs-chip" data-slide="4">HPC-native</button>
+      </div>
+    </figure>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════════════════════
+     TRY IT — interactive playground section
+     ═══════════════════════════════════════════════════════ -->
+<section class="section section-divider try-it-section">
+  <div class="wrap">
+    <div class="try-it-head reveal">
+      <span class="eyebrow">Try it in the browser</span>
+      <h2>Feel the agent<br>without installing.</h2>
+      <p class="lead">Three live demos — a mode picker, a scripted Claude conversation, and a side-by-side of the old way vs. Operon. No account, no install.</p>
+    </div>
+
+    <!-- Which AI mode? picker -->
+    <div class="reveal" style="margin-bottom: 80px;">
+      <div class="text-center" style="margin-bottom: 28px;">
+        <span class="eyebrow">Interactive · 30 seconds</span>
+        <h3 style="margin-top: 10px;">Which AI mode should I use?</h3>
+        <p style="color: var(--text-3); margin-top: 6px;">Answer three questions and we'll point you at the right mode.</p>
+      </div>
+      <div class="mode-picker" data-mode-picker>
+        <div class="mp-header">
+          <h3 class="mp-step-title">Mode picker</h3>
+          <div class="mp-progress" aria-hidden="true"><div class="mp-progress-bar" style="width: 0%"></div></div>
+        </div>
+        <!-- Step 1 -->
+        <div class="mp-step active" data-mp-step="0">
+          <p class="mp-question">What stage is your work at?</p>
+          <div class="mp-opts">
+            <button type="button" class="mp-opt" data-mp-pick='{"agent":0,"plan":2,"ask":0,"report":0}'>
+              <span class="mp-opt-icon">🗺️</span>
+              <span><strong>Planning</strong> — I'm scoping an analysis and don't want code yet.</span>
+            </button>
+            <button type="button" class="mp-opt" data-mp-pick='{"agent":2,"plan":0,"ask":0,"report":0}'>
+              <span class="mp-opt-icon">⚡</span>
+              <span><strong>Building</strong> — I want Claude to run commands and write files now.</span>
+            </button>
+            <button type="button" class="mp-opt" data-mp-pick='{"agent":0,"plan":0,"ask":2,"report":0}'>
+              <span class="mp-opt-icon">💬</span>
+              <span><strong>Exploring</strong> — I have a question and want a conversation, not code.</span>
+            </button>
+            <button type="button" class="mp-opt" data-mp-pick='{"agent":0,"plan":0,"ask":0,"report":2}'>
+              <span class="mp-opt-icon">📄</span>
+              <span><strong>Wrapping up</strong> — analysis is done, I need a write-up.</span>
+            </button>
+          </div>
+        </div>
+        <!-- Step 2 -->
+        <div class="mp-step" data-mp-step="1">
+          <p class="mp-question">Should Claude touch your files?</p>
+          <div class="mp-opts">
+            <button type="button" class="mp-opt" data-mp-pick='{"agent":2,"plan":1,"ask":0,"report":1}'>
+              <span class="mp-opt-icon">✍️</span>
+              <span><strong>Yes</strong> — it can edit scripts, run commands, and commit.</span>
+            </button>
+            <button type="button" class="mp-opt" data-mp-pick='{"agent":0,"plan":2,"ask":1,"report":1}'>
+              <span class="mp-opt-icon">🧐</span>
+              <span><strong>Draft first</strong> — propose a plan before executing anything.</span>
+            </button>
+            <button type="button" class="mp-opt" data-mp-pick='{"agent":0,"plan":0,"ask":2,"report":0}'>
+              <span class="mp-opt-icon">🔒</span>
+              <span><strong>Read-only</strong> — just answer the question, don't write anything.</span>
+            </button>
+          </div>
+        </div>
+        <!-- Step 3 -->
+        <div class="mp-step" data-mp-step="2">
+          <p class="mp-question">Do you need citations or polished output?</p>
+          <div class="mp-opts">
+            <button type="button" class="mp-opt" data-mp-pick='{"agent":0,"plan":0,"ask":2,"report":1}'>
+              <span class="mp-opt-icon">📚</span>
+              <span><strong>Yes, cite papers</strong> — use PubMed for grounded answers.</span>
+            </button>
+            <button type="button" class="mp-opt" data-mp-pick='{"agent":0,"plan":0,"ask":0,"report":2}'>
+              <span class="mp-opt-icon">📝</span>
+              <span><strong>Yes, make a PDF</strong> — turn the session into a publication-ready write-up.</span>
+            </button>
+            <button type="button" class="mp-opt" data-mp-pick='{"agent":2,"plan":1,"ask":0,"report":0}'>
+              <span class="mp-opt-icon">🚀</span>
+              <span><strong>No</strong> — just get the result fast.</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Results -->
+        <div class="mp-result" data-mp-result="agent">
+          <span class="mp-result-badge">Recommended mode</span>
+          <h3 class="mp-result-title">Agent mode</h3>
+          <p class="mp-result-desc">Claude will run commands in your shell, edit files, and iterate on outputs until the analysis finishes. You watch the stream and step in when needed.</p>
+          <div class="mp-result-actions">
+            <a href="guide.html#agent-mode" class="btn btn-primary btn-sm">Learn Agent mode →</a>
+            <a href="download.html" class="btn btn-ghost btn-sm">Download &amp; try</a>
+          </div>
+          <button type="button" class="mp-restart" data-mp-restart>Start over</button>
+        </div>
+        <div class="mp-result" data-mp-result="plan">
+          <span class="mp-result-badge">Recommended mode</span>
+          <h3 class="mp-result-title">Plan mode</h3>
+          <p class="mp-result-desc">Claude writes an <code>implementation_plan.md</code> — a step-by-step proposal you can review, edit, and approve before any code runs. Great for risky or long-running work.</p>
+          <div class="mp-result-actions">
+            <a href="guide.html#plan-mode" class="btn btn-primary btn-sm">Learn Plan mode →</a>
+            <a href="download.html" class="btn btn-ghost btn-sm">Download &amp; try</a>
+          </div>
+          <button type="button" class="mp-restart" data-mp-restart>Start over</button>
+        </div>
+        <div class="mp-result" data-mp-result="ask">
+          <span class="mp-result-badge">Recommended mode</span>
+          <h3 class="mp-result-title">Ask mode</h3>
+          <p class="mp-result-desc">Read-only conversation. Toggle PubMed and Claude cites real DOIs. Perfect for the "why did DESeq2 shrink these log-fold changes?" moments.</p>
+          <div class="mp-result-actions">
+            <a href="guide.html#ask-mode" class="btn btn-primary btn-sm">Learn Ask mode →</a>
+            <a href="download.html" class="btn btn-ghost btn-sm">Download &amp; try</a>
+          </div>
+          <button type="button" class="mp-restart" data-mp-restart>Start over</button>
+        </div>
+        <div class="mp-result" data-mp-result="report">
+          <span class="mp-result-badge">Recommended mode</span>
+          <h3 class="mp-result-title">Report mode</h3>
+          <p class="mp-result-desc">Turn a finished session into a publication-ready PDF — methods, figures, citations, and a reproducibility appendix, all generated from the session transcript.</p>
+          <div class="mp-result-actions">
+            <a href="guide.html#report-mode" class="btn btn-primary btn-sm">Learn Report mode →</a>
+            <a href="download.html" class="btn btn-ghost btn-sm">Download &amp; try</a>
+          </div>
+          <button type="button" class="mp-restart" data-mp-restart>Start over</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat playground -->
+    <div class="reveal" style="margin-bottom: 80px;">
+      <div class="text-center" style="margin-bottom: 28px;">
+        <span class="eyebrow">Watch the agent think</span>
+        <h3 style="margin-top: 10px;">A real Operon conversation, replayed.</h3>
+        <p style="color: var(--text-3); margin-top: 6px;">Pick a scenario and watch Claude stream tool calls, thinking, and cited answers.</p>
+      </div>
+      <div class="chat-playground" data-chat-playground>
+        <div class="cp-header">
+          <div class="cp-dots"><span></span><span></span><span></span></div>
+          <div class="cp-title">operon — chat.tsx</div>
+        </div>
+        <div class="cp-presets" role="tablist" aria-label="Conversation scenarios">
+          <button type="button" class="cp-preset active" data-cp-preset="analyze" role="tab">scRNA-seq clustering</button>
+          <button type="button" class="cp-preset" data-cp-preset="pipeline" role="tab">Build a Snakemake pipeline</button>
+          <button type="button" class="cp-preset" data-cp-preset="pubmed" role="tab">Ask PubMed</button>
+          <button type="button" class="cp-preset" data-cp-preset="debug" role="tab">Debug a STAR crash</button>
+        </div>
+        <div class="cp-messages" data-cp-messages aria-live="polite"></div>
+        <div class="cp-footer">
+          <span>Scripted demo · replay any time</span>
+          <button type="button" class="cp-replay" data-cp-replay>↻ Replay</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Before / After slider -->
+    <div class="reveal">
+      <div class="text-center" style="margin-bottom: 28px;">
+        <span class="eyebrow">Drag to compare</span>
+        <h3 style="margin-top: 10px;">The old way vs. with Operon.</h3>
+        <p style="color: var(--text-3); margin-top: 6px;">Same analysis, two worlds. Drag the divider.</p>
+      </div>
+      <div class="before-after" data-ba-slider>
+        <div class="ba-layers">
+          <div class="ba-pane ba-before">
+            <span class="ba-label before">Before</span>
+            <h4>bulk-rnaseq — manual</h4>
+            <p>You open a blank terminal and write:</p>
+<pre data-no-copy><code># Write a Snakefile from scratch
+$ vim Snakefile
+# Set up the conda env
+$ conda create -n rnaseq -c bioconda fastp star subread deseq2
+$ conda activate rnaseq
+# Write the alignment rule...
+rule align:
+    input:  "fastq/{sample}_R1.fq.gz"
+    output: "bam/{sample}.bam"
+    shell:  "STAR --runThreadN 8 --genomeDir {genome} ..."
+# 40 more rules, plus SLURM profile, plus QC...
+$ snakemake -j 16 --use-conda --profile slurm
+# STAR segfaults at 4 a.m. No traceback.
+$ tail log.out
+Segmentation fault (core dumped)
+# Read the STAR source on GitHub for two hours.
+# Realize --genomeLoad is the problem.
+# Fix it. Rerun. Repeat.</code></pre>
+            <p style="margin-top: 14px;"><strong>Time:</strong> <span style="color: var(--warn);">2–3 days</span> · <strong>Expertise:</strong> advanced</p>
+          </div>
+          <div class="ba-pane ba-after">
+            <span class="ba-label after">With Operon</span>
+            <h4>bulk-rnaseq — conversational</h4>
+            <p>You open Operon and type:</p>
+<pre data-no-copy><code>You: Run a standard bulk RNA-seq pipeline on the FASTQs in ./raw —
+     I want counts, a DESeq2 contrast of WT vs. KO, and volcano plots.
+
+Claude ✻ Plan:
+  1. Detect 6 samples · paired-end · ~30M reads each
+  2. Apply protocol: bulk-rnaseq.v3 (fastp → STAR → featureCounts → DESeq2)
+  3. Submit as SLURM array on HPC
+  4. Generate volcano + heatmap
+
+[Proceed?] y
+
+⠋ Running fastp on 6 samples...        ✓ done (4m12s)
+⠋ STAR alignment (SLURM job 284712)...  ✓ done (38m)
+⠋ featureCounts → counts.tsv...         ✓ done
+⠋ DESeq2 contrast WT vs. KO...          ✓ 412 DEGs (FDR < 0.05)
+⠋ Rendering volcano + heatmap...        ✓ figs/ready
+
+Session summary written to report.md.</code></pre>
+            <p style="margin-top: 14px;"><strong>Time:</strong> <span style="color: var(--success);">45 minutes</span> · <strong>Expertise:</strong> whatever you already have</p>
+          </div>
+          <div class="ba-divider" role="slider" aria-label="Drag to compare before and after" tabindex="0" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
+            <div class="ba-handle">⇆</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     FEATURE SCROLL — four big alternating rows
+     ═══════════════════════════════════════════════════════ -->
+<section class="section section-divider">
+  <div class="wrap">
+
+    <div class="frow">
+      <div class="frow-text reveal">
+        <span class="eyebrow">Agent mode</span>
+        <h2>Describe the analysis.<br>Operon runs it.</h2>
+        <p>Point Operon at your data and ask for the experiment. Claude writes the script, runs it in your terminal, reads the output, and iterates until the plot is on disk. You watch.</p>
+        <ul>
+          <li>Understands FASTA, FASTQ, VCF, BAM, GFF, H5AD, MTX, and 20+ other formats</li>
+          <li>Runs commands in your shell — respects conda, modules, aliases</li>
+          <li>Streams every tool call so you can interrupt, redirect, or approve</li>
+        </ul>
+      </div>
+      <div class="frow-media reveal">
+        <img src="img/tour-ai-modes.png" alt="Agent, Plan, and Ask mode selector" loading="lazy">
+      </div>
+    </div>
+
+    <div class="frow reverse">
+      <div class="frow-text reveal">
+        <span class="eyebrow">Protocols · import &amp; reuse</span>
+        <h2>Your lab's pipelines,<br>one click away.</h2>
+        <p>Drop a Snakemake workflow, Nextflow pipeline, bash script, or R notebook into Operon and Claude turns it into a reusable <strong>protocol</strong> — parameters, dependencies, and run command all captured. Share it with your lab, run it from any project, version it with Git.</p>
+        <ul>
+          <li><strong>Import</strong> Snakemake, Nextflow, bash, or R workflows in one drag</li>
+          <li><strong>Browse</strong> a growing catalog of bioinformatics protocols — scRNA-seq, ATAC, ChIP, bulk, spatial</li>
+          <li><strong>Run</strong> any protocol on local data or over SSH on your HPC</li>
+        </ul>
+        <div class="mt-6 row" style="gap: 10px; flex-wrap: wrap;">
+          <a href="protocols.html" class="btn btn-primary btn-sm">Explore protocols →</a>
+          <a href="protocols.html#import" class="btn btn-ghost btn-sm">How import works</a>
+        </div>
+      </div>
+      <div class="frow-media reveal pipe-carousel" aria-label="Protocols import walkthrough — browse, import, run">
+        <div class="pipe-stage">
+          <img src="img/protocols1.png" alt="Browse the Operon protocol catalog" loading="lazy">
+          <img src="img/protocols2.png" alt="Import an existing Snakemake or Nextflow pipeline" loading="lazy">
+          <img src="img/protocols3.png" alt="Run the protocol on a new project" loading="lazy">
+        </div>
+        <div class="pipe-caption">
+          <span class="pipe-label" data-slide="0">Browse the built-in protocol catalog</span>
+          <span class="pipe-label" data-slide="1">Drag in your own pipeline — Claude wires it up</span>
+          <span class="pipe-label" data-slide="2">Run on any dataset, local or HPC</span>
+          <div class="pipe-dots" role="tablist" aria-label="Carousel progress">
+            <button type="button" class="pipe-dot" data-slide="0" aria-label="Browse"></button>
+            <button type="button" class="pipe-dot" data-slide="1" aria-label="Import"></button>
+            <button type="button" class="pipe-dot" data-slide="2" aria-label="Run"></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="frow">
+      <div class="frow-text reveal">
+        <span class="eyebrow">Ask mode · PubMed</span>
+        <h2>Grounded in the literature.</h2>
+        <p>Ask mode is pure Q&amp;A — no commands, no file writes. Toggle PubMed and Claude will search NCBI, retrieve papers, and answer with proper citations. No API key required.</p>
+        <ul>
+          <li>Ideal for "why did DESeq2 shrink these log-fold changes?" moments</li>
+          <li>Cites real DOIs you can open in one click</li>
+          <li>Works alongside the editor — perfect for literature review sessions</li>
+        </ul>
+      </div>
+      <div class="frow-media reveal">
+        <img src="img/pubmed-toggle.png" alt="PubMed search toggle in the chat panel" loading="lazy">
+      </div>
+    </div>
+
+    <div class="frow reverse">
+      <div class="frow-text reveal">
+        <span class="eyebrow">HPC-native</span>
+        <h2>Run on your cluster,<br>not your laptop.</h2>
+        <p>SSH into your institution's HPC, grab a compute node, and let Claude run inside a persistent <code>tmux</code> session. Sessions survive dropped Wi-Fi and closed laptops. Your data never leaves the server.</p>
+        <ul>
+          <li>SLURM, PBS/Torque, and SGE batch-job templates built in</li>
+          <li>Shared-filesystem aware — works around <code>/tmp</code> being node-local</li>
+          <li>Resume a running analysis from any Mac, Windows, or Linux machine</li>
+        </ul>
+        <div class="mt-6"><a href="hpc.html" class="btn btn-ghost btn-sm">HPC guide →</a></div>
+      </div>
+      <div class="frow-media reveal">
+        <img src="img/tour-hpc.png" alt="Operon connected to an HPC cluster over SSH" loading="lazy">
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     PRIVATE LLM — "Your data. Your model. Your machine."
+     ═══════════════════════════════════════════════════════ -->
+<section class="section section-divider" style="background: linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 40%, var(--bg) 100%);">
+  <div class="wrap">
+    <div class="section-head reveal" style="max-width: 760px;">
+      <span class="eyebrow">Private LLM stack</span>
+      <h2>Your data. Your model.<br>Your machine.</h2>
+      <p class="lead">Clinical cohorts, embargoed sequencing data, industry collaborations — some of your work simply cannot leave your network. Operon was built for that reality from day one.</p>
+    </div>
+
+    <div class="feature-grid reveal">
+      <div class="fcard">
+        <svg class="fcard-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2"/><line x1="2" y1="20" x2="22" y2="20"/><path d="M8 8h8M8 12h5"/></svg>
+        <h4>Run locally with Ollama</h4>
+        <p>Point Operon at a local Ollama daemon and run <code>llama3</code>, <code>qwen-coder</code>, <code>deepseek-coder</code> — any model you've pulled. Zero network egress.</p>
+      </div>
+      <div class="fcard">
+        <svg class="fcard-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17l6-6 4 4 6-6"/><path d="M14 9h6v6"/></svg>
+        <h4>On-prem via vLLM or LM Studio</h4>
+        <p>Spin up vLLM or LM Studio on a lab server. Operon's bundled translation proxy turns any OpenAI-compatible endpoint into a first-class backend.</p>
+      </div>
+      <div class="fcard">
+        <svg class="fcard-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>
+        <h4>40+ backends, one interface</h4>
+        <p>LiteLLM, OpenRouter, Together, Groq, DeepInfra, Cerebras — all work through the same translation proxy. Switch providers per-session, not per-install.</p>
+      </div>
+      <div class="fcard">
+        <svg class="fcard-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+        <h4>Secrets in the OS keychain</h4>
+        <p>API keys live in macOS Keychain, Windows Credential Manager, or libsecret on Linux — never in plain-text config files, never in telemetry.</p>
+      </div>
+      <div class="fcard">
+        <svg class="fcard-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M5 12l4-4M5 12l4 4M19 4v16"/></svg>
+        <h4>Reverse-tunnel to your cluster</h4>
+        <p>Host a 70B model on an A100 node, tunnel it over SSH, and query it from your laptop like it's localhost. The recipe is documented, not magic.</p>
+      </div>
+      <div class="fcard">
+        <svg class="fcard-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+        <h4>No telemetry</h4>
+        <p>Operon collects nothing. Not a session count, not a crash breadcrumb, not a ping. If you want to see for yourself — the source is on GitHub.</p>
+      </div>
+      <div class="fcard">
+        <svg class="fcard-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9"/><path d="M21 3v6h-6"/><circle cx="12" cy="12" r="3"/></svg>
+        <h4>Fully air-gapped</h4>
+        <p>No license server, no update pings, no phone-home. Unplug the Ethernet cable and Operon still starts, still runs Ollama, still executes protocols.</p>
+      </div>
+      <div class="fcard">
+        <svg class="fcard-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v6H4z"/><path d="M4 14h16v6H4z"/><circle cx="8" cy="7" r="1" fill="currentColor"/><circle cx="8" cy="17" r="1" fill="currentColor"/></svg>
+        <h4>Per-model token budgets</h4>
+        <p>Set hard ceilings on tokens-per-session and dollars-per-month. Operon stops and asks before crossing — no surprise invoices from cloud backends.</p>
+      </div>
+    </div>
+
+    <div class="row reveal" style="justify-content: center; margin-top: 40px;">
+      <a href="private-llm.html" class="btn btn-ghost">Private-LLM setup guide →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     MCP CATALOG
+     ═══════════════════════════════════════════════════════ -->
+<section class="section section-divider">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">Research MCPs</span>
+      <h2>The tools biologists actually use — one click away.</h2>
+      <p class="lead">Operon ships with a catalog of <span data-mcp-count>12+</span> MCP servers that give Claude direct, typed access to the databases your analysis depends on. Install, toggle, and every chat session gets the tool.</p>
+    </div>
+
+    <div class="feature-grid reveal">
+      <div class="fcard"><h4>PubMed</h4><p>Full-text literature search grounded in NCBI's E-utilities.</p></div>
+      <div class="fcard"><h4>BioMCP</h4><p>PDB structure retrieval, UniProt lookups, AlphaFold access.</p></div>
+      <div class="fcard"><h4>GEO</h4><p>Query any GSE accession, pull metadata, stream count matrices.</p></div>
+      <div class="fcard"><h4>GTEx</h4><p>Tissue-specific expression across the GTEx v8 release.</p></div>
+      <div class="fcard"><h4>JASPAR</h4><p>Transcription-factor motifs for enrichment workflows.</p></div>
+      <div class="fcard"><h4>KEGG</h4><p>Pathway-level enrichment and gene-ontology crosswalks.</p></div>
+      <div class="fcard"><h4>AlphaFold</h4><p>Predicted structures by UniProt ID, straight into PyMOL.</p></div>
+      <div class="fcard"><h4>Gene databases</h4><p>Cross-species ortholog lookup, Ensembl and RefSeq resolution.</p></div>
+    </div>
+
+    <div class="row reveal" style="justify-content: center; margin-top: 40px;">
+      <a href="mcp.html" class="btn btn-ghost">Browse the catalog →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     EVERYTHING IN ONE BAR — feature grid
+     ═══════════════════════════════════════════════════════ -->
+<section class="section section-divider">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">The full surface</span>
+      <h2>Everything you'd leave an IDE to do — already here.</h2>
+    </div>
+
+    <div class="feature-grid reveal">
+      <div class="fcard">
+        <svg class="fcard-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h18M3 12h18M3 17h18"/></svg>
+        <h4>Four AI modes</h4><p>Agent · Plan · Ask · Report.</p>
+      </div>
+      <div class="fcard">
+        <svg class="fcard-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16v14H4z"/><path d="M4 10h16"/></svg>
+        <h4><span data-protocol-count>180+</span> protocols</h4><p>RNA-seq, scRNA, ATAC, spatial, proteomics, more.</p>
+      </div>
+      <div class="fcard">
+        <svg class="fcard-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20l-7-7 7-7 7 7-7 7z"/><circle cx="12" cy="13" r="2"/></svg>
+        <h4>Protocol generator</h4><p>Describe a workflow; Claude writes the full protocol.</p>
+      </div>
+      <div class="fcard">
+        <svg class="fcard-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+        <h4>PubMed-grounded</h4><p>Real citations, real DOIs, no hallucinations.</p>
+      </div>
+      <div class="fcard">
+        <svg class="fcard-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 20h8M12 17v3"/></svg>
+        <h4>SSH + tmux + SLURM</h4><p>Persistent sessions on remote compute nodes.</p>
+      </div>
+      <div class="fcard">
+        <svg class="fcard-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M8 12l3 3 5-6"/></svg>
+        <h4>Claude on compute nodes</h4><p>The agent runs where the data lives.</p>
+      </div>
+      <div class="fcard">
+        <svg class="fcard-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 0 0 0 20M2 12h20"/></svg>
+        <h4>MCP catalog</h4><p>PubMed, GEO, GTEx, JASPAR, KEGG, AlphaFold.</p>
+      </div>
+      <div class="fcard">
+        <svg class="fcard-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+        <h4>Private LLMs</h4><p>Ollama, vLLM, LM Studio — local or on-prem.</p>
+      </div>
+      <div class="fcard">
+        <svg class="fcard-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14M5 12h14M5 16h14"/><circle cx="19" cy="8" r="1.2"/><circle cx="19" cy="12" r="1.2"/><circle cx="19" cy="16" r="1.2"/></svg>
+        <h4>Monaco editor</h4><p>The engine that powers VS Code — 30+ languages.</p>
+      </div>
+      <div class="fcard">
+        <svg class="fcard-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="12" r="2"/><path d="M6 8v8M8 6c4 2 10 3 10 6M8 18c4-2 10-3 10-6"/></svg>
+        <h4>Git + GitHub</h4><p>Stage, commit, push, publish — all in-app.</p>
+      </div>
+      <div class="fcard">
+        <svg class="fcard-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="3" width="8" height="14" rx="4"/><path d="M5 11a7 7 0 0 0 14 0M12 21v-4"/></svg>
+        <h4>Voice dictation</h4><p>Native OS speech recognition into the chat input.</p>
+      </div>
+      <div class="fcard">
+        <svg class="fcard-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h10l4 4v12H6z"/><path d="M14 4v4h4"/><path d="M9 13h8M9 17h6"/></svg>
+        <h4>Report mode</h4><p>Turn a session into a publication-ready PDF.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     PROTOCOLS SHOWCASE
+     ═══════════════════════════════════════════════════════ -->
+<section class="section section-divider">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">Protocols library</span>
+      <h2><span data-protocol-count>180+</span> analyses, curated.</h2>
+      <p class="lead">Every protocol encodes real-world best practices — conda environments, tool versions, QC gates, SLURM resource hints — so Claude doesn't guess. Pick one to start, or describe your own.</p>
+    </div>
+
+    <div class="feature-grid reveal">
+      <div class="fcard"><span class="pill" style="align-self:flex-start; background:rgba(59,130,246,.08); color:var(--accent-2); border-color:rgba(59,130,246,.25);">Single-cell</span><h4>Scanpy end-to-end</h4><p>QC, normalization, HVG, PCA, Leiden clustering, UMAP.</p></div>
+      <div class="fcard"><span class="pill" style="align-self:flex-start; background:rgba(59,130,246,.08); color:var(--accent-2); border-color:rgba(59,130,246,.25);">Single-cell</span><h4>Seurat integration</h4><p>Multi-dataset harmonization with SCTransform.</p></div>
+      <div class="fcard"><span class="pill" style="align-self:flex-start;">Bulk RNA-seq</span><h4>DESeq2 · PyDESeq2</h4><p>Count modelling, shrinkage, volcano + MA plots.</p></div>
+      <div class="fcard"><span class="pill" style="align-self:flex-start;">Imaging</span><h4>CellPose segmentation</h4><p>Model selection, GPU config, mask QC.</p></div>
+      <div class="fcard"><span class="pill" style="align-self:flex-start;">Spatial</span><h4>Visium / 10x spatial</h4><p>Spot deconvolution and niche analysis.</p></div>
+      <div class="fcard"><span class="pill" style="align-self:flex-start;">Epigenomics</span><h4>ATAC-seq pipeline</h4><p>Alignment, peak calling, motif enrichment.</p></div>
+      <div class="fcard"><span class="pill" style="align-self:flex-start;">Structural</span><h4>AlphaFold lookups</h4><p>Fetch, align, and render predicted structures.</p></div>
+      <div class="fcard"><span class="pill" style="align-self:flex-start;">Dynamics</span><h4>scVelo trajectories</h4><p>RNA velocity on raw or processed counts.</p></div>
+    </div>
+
+    <div class="row reveal" style="justify-content: center; margin-top: 40px;">
+      <a href="protocols.html" class="btn btn-ghost">Browse all <span data-protocol-count>180+</span> →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     VIDEO TUTORIALS — front and center
+     ═══════════════════════════════════════════════════════ -->
+<section class="section section-divider">
+  <div class="wrap-wide">
+    <div class="section-head reveal">
+      <span class="eyebrow">Video tutorials</span>
+      <h2>Watch a biologist use it.</h2>
+      <p class="lead">Every feature in this page has a 5-minute video walkthrough. Start with the full install; skip to the scRNA-seq or CellPose demo if you want to see the agent in action.</p>
+    </div>
+
+    <!-- Featured -->
+    <div class="reveal video-featured">
+      <div class="card" style="padding:0; overflow:hidden; border-radius: var(--radius-lg);">
+        <div class="yt-box" data-yt="5S7LkFsbpr8" data-yt-title="Single-cell RNA-seq with Scanpy" style="aspect-ratio: 16/9; background:#000;"></div>
+        <div style="padding: 24px;">
+          <span class="pill" style="background:rgba(59,130,246,.08); color:var(--accent-2); border-color:rgba(59,130,246,.25);">Featured · analysis</span>
+          <h3 style="margin-top: 12px;">Single-cell RNA-seq with Scanpy — end to end</h3>
+          <p class="text-muted" style="margin-top: 8px;">From raw <code>h5ad</code> to a finished UMAP, watch Operon run QC, HVG selection, clustering, and annotation — all driven from a single chat prompt.</p>
+        </div>
+      </div>
+
+      <div class="video-sidebar">
+        <a class="card video-thumb" href="tutorials.html#install">
+          <div class="yt-box" data-yt="xTiIVEWWH-M" data-yt-title="Installing Operon on macOS" style="aspect-ratio: 16/9; background:#000;"></div>
+          <div style="padding: 14px 16px;"><strong>Install Operon</strong><div class="text-muted" style="font-size: .86rem;">Setup wizard walkthrough.</div></div>
+        </a>
+        <a class="card video-thumb" href="tutorials.html#ssh">
+          <div class="yt-box" data-yt="i4pS9DA9LAg" data-yt-title="Connect to a remote server" style="aspect-ratio: 16/9; background:#000;"></div>
+          <div style="padding: 14px 16px;"><strong>Connect via SSH</strong><div class="text-muted" style="font-size: .86rem;">Hostname, Duo/MFA, keys.</div></div>
+        </a>
+        <a class="card video-thumb" href="tutorials.html#remote-claude">
+          <div class="yt-box" data-yt="6hU7m5w4X9o" data-yt-title="Install Claude on a remote server" style="aspect-ratio: 16/9; background:#000;"></div>
+          <div style="padding: 14px 16px;"><strong>Claude on your cluster</strong><div class="text-muted" style="font-size: .86rem;">Run the agent on the login node.</div></div>
+        </a>
+      </div>
+    </div>
+
+    <div class="row reveal" style="justify-content: center; margin-top: 40px;">
+      <a href="tutorials.html" class="btn btn-ghost">See all tutorials →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     SOCIAL PROOF / BUILT BY
+     ═══════════════════════════════════════════════════════ -->
+<section class="section section-divider">
+  <div class="wrap text-center reveal">
+    <span class="eyebrow">Built by biologists</span>
+    <h2 style="margin: 14px auto 20px; max-width: 22ch;">Made at the bench,<br>for the bench.</h2>
+    <p class="lead" style="margin: 0 auto; max-width: 60ch;">Operon is developed by the <a href="https://swaruplab.bio.uci.edu" target="_blank" rel="noopener">Swarup Lab</a> at UC Irvine — a neurogenomics group running single-cell, spatial, and epigenomic experiments in Alzheimer's disease. We built Operon because we needed it ourselves.</p>
+
+    <a class="builder-row" href="https://swaruplab.bio.uci.edu" target="_blank" rel="noopener" style="margin-top: 32px;">
+      <img src="img/Logo-icon-01.png" alt="Swarup Lab">
+      <span class="builder-sep"></span>
+      <span class="builder-text"><strong>Swarup Lab</strong><span>UC Irvine · Dept. of Anatomy &amp; Neurobiology</span></span>
+    </a>
+
+    <div class="row" style="justify-content: center; margin-top: 28px; gap: 10px;">
+      <span class="pill">UC Irvine</span>
+      <span class="pill">Neurogenomics · AD</span>
+      <span class="pill">MIT-licensed</span>
+      <a class="gh-chip" href="https://github.com/swaruplab/operon" target="_blank" rel="noopener" style="text-decoration:none;">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5C5.65.5.5 5.65.5 12a11.5 11.5 0 0 0 7.86 10.92c.57.1.78-.25.78-.55v-1.94c-3.2.7-3.87-1.54-3.87-1.54-.52-1.33-1.28-1.68-1.28-1.68-1.04-.72.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.02 1.76 2.69 1.25 3.35.96.1-.74.4-1.25.72-1.54-2.55-.29-5.23-1.28-5.23-5.69 0-1.26.45-2.28 1.18-3.09-.12-.29-.51-1.46.11-3.05 0 0 .97-.31 3.17 1.18.92-.25 1.9-.38 2.88-.38.98 0 1.96.13 2.88.38 2.2-1.49 3.17-1.18 3.17-1.18.62 1.59.23 2.76.11 3.05.74.81 1.18 1.83 1.18 3.09 0 4.42-2.69 5.39-5.25 5.68.41.36.78 1.06.78 2.13v3.16c0 .3.21.66.79.55A11.5 11.5 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5z"/></svg>
+        <span data-gh-stars>★</span> stars
+        <span class="gh-sep"></span>
+        <span data-gh-contributors>—</span> contributors
+        <span class="gh-sep"></span>
+        <span data-gh-release>v0.5.9</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     SCROLLYTELLER — scroll-driven walkthrough
+     ═══════════════════════════════════════════════════════ -->
+<section class="section section-divider" style="padding-top: 40px; padding-bottom: 40px;">
+  <div class="wrap">
+    <div class="section-head reveal" style="max-width: 760px;">
+      <span class="eyebrow">A day with Operon</span>
+      <h2>Scroll through a real session.</h2>
+      <p class="lead">One scroll, one analysis — from opening the app to publication-ready figures on disk.</p>
+    </div>
+
+    <div class="scrolly" data-scrollyteller>
+      <div class="scrolly-steps">
+        <div data-scrolly-step="0">
+          <span class="eyebrow">Step 1</span>
+          <h3>Open the workspace.</h3>
+          <p>Project folder on the left, Monaco in the middle, terminal at the bottom, Claude on the right. Everything in one window — no tab-hopping.</p>
+        </div>
+        <div data-scrolly-step="1">
+          <span class="eyebrow">Step 2</span>
+          <h3>Pick your AI mode.</h3>
+          <p>Agent runs commands. Plan drafts a proposal. Ask is pure Q&amp;A with PubMed. Report wraps the session into a PDF. One keystroke to switch.</p>
+        </div>
+        <div data-scrolly-step="2">
+          <span class="eyebrow">Step 3</span>
+          <h3>Start from a protocol.</h3>
+          <p>Drop in your data and pick a protocol — scRNA-seq, ATAC, CellPose, any of 180+. Or describe what you want and Claude writes a fresh one.</p>
+        </div>
+        <div data-scrolly-step="3">
+          <span class="eyebrow">Step 4</span>
+          <h3>Ground every claim.</h3>
+          <p>Toggle PubMed and Claude pulls real DOIs to back its answer. No hallucinated citations, no API key, no separate tab.</p>
+        </div>
+        <div data-scrolly-step="4">
+          <span class="eyebrow">Step 5</span>
+          <h3>Ship it on the HPC.</h3>
+          <p>SSH to the cluster, grab a compute node, hand the analysis to Claude in a <code>tmux</code> session. Close the laptop. Come back tomorrow to finished figures.</p>
+        </div>
+      </div>
+      <div class="scrolly-stage" data-scrolly-stage>
+        <div class="scrolly-slide active" data-scrolly-layer="0"><img src="img/main-workspace.png" alt="Workspace: file tree, Monaco, terminal, and chat"></div>
+        <div class="scrolly-slide" data-scrolly-layer="1"><img src="img/tour-ai-modes.png" alt="Four AI modes — Agent, Plan, Ask, Report"></div>
+        <div class="scrolly-slide" data-scrolly-layer="2"><img src="img/protocols1.png" alt="Protocol catalog"></div>
+        <div class="scrolly-slide" data-scrolly-layer="3"><img src="img/pubmed-toggle.png" alt="Ask mode with PubMed toggle"></div>
+        <div class="scrolly-slide" data-scrolly-layer="4"><img src="img/tour-hpc.png" alt="Operon running over SSH on an HPC"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     BIG DOWNLOAD BAND
+     ═══════════════════════════════════════════════════════ -->
+<section class="section" style="background: radial-gradient(ellipse 60% 80% at 50% 120%, var(--accent-glow) 0%, transparent 60%); border-top: 1px solid var(--line);">
+  <div class="wrap text-center reveal">
+    <h2 style="font-size: clamp(2.2rem, 5vw, 3.6rem); margin-bottom: 18px;">Get Operon.</h2>
+    <p class="lead" style="margin: 0 auto 36px;">Free. Open-source. macOS, Windows, and Linux. No account required to install.</p>
+
+    <div class="row" style="justify-content: center; gap: 12px;">
+      <a data-dl="dl-apple-silicon" class="btn btn-primary btn-lg">macOS · Apple Silicon</a>
+      <a data-dl="dl-intel" class="btn btn-ghost btn-lg">macOS · Intel</a>
+      <a data-dl="dl-windows" class="btn btn-ghost btn-lg">Windows</a>
+      <a data-dl="dl-linux-deb" class="btn btn-ghost btn-lg">Linux · .deb</a>
+      <a data-dl="dl-linux-appimage" class="btn btn-ghost btn-lg">Linux · AppImage</a>
+    </div>
+
+    <p class="text-muted mt-6" style="font-size: .88rem;">
+      <span data-version>v0.5.9</span> · <a href="https://github.com/swaruplab/operon/releases" target="_blank" rel="noopener">release notes</a> · <a href="download.html">all downloads &amp; checksums</a>
+    </p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     FOOTER
+     ═══════════════════════════════════════════════════════ -->
+<footer class="site-footer">
+  <div class="wrap-wide footer-grid">
+    <div class="footer-brand">
+      <div class="brand"><span class="brand-dot"></span> Operon</div>
+      <p>An AI-native IDE for computational biology, built by the <a href="https://swaruplab.bio.uci.edu" target="_blank" rel="noopener">Swarup Lab</a> at UC Irvine.</p>
+      <a class="sl-logo" href="https://swaruplab.bio.uci.edu" target="_blank" rel="noopener" aria-label="Swarup Lab">
+        <img src="img/Logo-icon-01.png" alt="Swarup Lab">
+      </a>
+      <div class="row" style="gap:8px;">
+        <span class="pill"><span class="pill-dot"></span> <span data-version>v0.5.9</span></span>
+        <span class="pill">MIT</span>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h5>Product</h5>
+      <ul>
+        <li><a href="protocols.html">Protocols</a></li>
+        <li><a href="mcp.html">MCP catalog</a></li>
+        <li><a href="private-llm.html">Private LLM</a></li>
+        <li><a href="hpc.html">HPC mode</a></li>
+        <li><a href="download.html">Download</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>Learn</h5>
+      <ul>
+        <li><a href="tutorials.html">Video tutorials</a></li>
+        <li><a href="guide.html">Documentation</a></li>
+        <li><a href="guide.html#faq">FAQ</a></li>
+        <li><a href="guide.html#keyboard-shortcuts">Shortcuts</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>Project</h5>
+      <ul>
+        <li><a href="https://github.com/swaruplab/operon" target="_blank" rel="noopener">GitHub</a></li>
+        <li><a href="https://github.com/swaruplab/operon/releases" target="_blank" rel="noopener">Releases</a></li>
+        <li><a href="https://github.com/swaruplab/operon/issues" target="_blank" rel="noopener">Report an issue</a></li>
+        <li><a href="https://swaruplab.bio.uci.edu" target="_blank" rel="noopener">Swarup Lab</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="wrap-wide footer-bottom">
+    <span>© Swarup Lab, UC Irvine · MIT licensed</span>
+    <span>Built with Tauri 2, React &amp; Rust</span>
+  </div>
+</footer>
+
+<!-- 60-second guided tour modal -->
+<div class="tour-modal" data-tour-modal aria-hidden="true" role="dialog" aria-labelledby="tour-title" data-tour-steps='[
+  {"title":"The workspace","desc":"File tree, Monaco editor, terminal, and Claude chat — one window, no tab juggling.","img":"img/main-workspace.png","hotspot":{"x":75,"y":50}},
+  {"title":"Four AI modes","desc":"Agent runs code. Plan drafts a proposal. Ask answers with PubMed citations. Report writes the PDF.","img":"img/tour-ai-modes.png","hotspot":{"x":85,"y":20,"w":12,"h":8}},
+  {"title":"180+ protocols","desc":"Drop in FASTQs or an AnnData. Pick a protocol. Claude wires up the environment and runs it.","img":"img/protocols1.png"},
+  {"title":"PubMed-grounded Q&A","desc":"Toggle PubMed in Ask mode — Claude cites real DOIs you can click through to NCBI.","img":"img/pubmed-toggle.png","hotspot":{"x":65,"y":35,"w":15,"h":10}},
+  {"title":"HPC-native","desc":"SSH into the cluster, grab a compute node, and let Claude work in a persistent tmux session. Close your laptop and come back to finished figures.","img":"img/tour-hpc.png"}
+]'>
+  <div class="tour-box" role="document">
+    <div class="tour-stage">
+      <div class="tour-hotspot" style="display:none;"></div>
+      <button type="button" class="tour-close" data-tour-close aria-label="Close tour">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+      <div class="tour-progress" style="width:0%"></div>
+    </div>
+    <div class="tour-body">
+      <span class="tour-step-label">1 / 5</span>
+      <h3 id="tour-title" class="tour-title">—</h3>
+      <p class="tour-desc">—</p>
+    </div>
+    <div class="tour-controls">
+      <div class="tour-dots" aria-hidden="true"></div>
+      <div class="tour-buttons">
+        <button type="button" class="btn btn-ghost btn-sm" data-tour-prev>← Prev</button>
+        <button type="button" class="btn btn-primary btn-sm" data-tour-next>Next →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Lightbox + back to top -->
+<div class="lightbox" aria-hidden="true"><img src="" alt=""></div>
+<button class="backtop" aria-label="Back to top">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+</button>
+
+<!-- Small layout + YouTube-button style local to homepage -->
+<style>
+  .yt-box { position: relative; display:block; cursor:pointer; overflow:hidden; }
+  .yt-box img { width:100%; height:100%; object-fit: cover; display:block; }
+  .yt-box .yt-play {
+    position:absolute; top:50%; left:50%; transform: translate(-50%,-50%);
+    width: 68px; height: 68px; border-radius: 50%; background: transparent; padding: 0;
+    transition: transform .2s;
+  }
+  .yt-box:hover .yt-play { transform: translate(-50%,-50%) scale(1.06); }
+  .yt-box iframe { position:absolute; inset:0; width:100%; height:100%; border:0; }
+  .yt-box .yt-ext {
+    position: absolute; right: 10px; bottom: 10px;
+    font-size: 0.78rem; font-weight: 500;
+    padding: 6px 10px; border-radius: 999px;
+    background: rgba(0,0,0,.65); color: #fff;
+    text-decoration: none;
+    border: 1px solid rgba(255,255,255,.18);
+    backdrop-filter: blur(4px);
+    opacity: 0; transition: opacity .15s;
+    z-index: 3;
+  }
+  .yt-box:hover .yt-ext { opacity: 1; }
+  .yt-box .yt-ext:hover { background: rgba(0,0,0,.85); border-color: rgba(255,255,255,.4); }
+  .yt-box .yt-ext-over { opacity: 1; right: 14px; bottom: 14px; }
+  .video-featured {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 28px;
+    align-items: start;
+  }
+  .video-featured > .card { display: flex; flex-direction: column; }
+  .video-featured > .card > .yt-box { aspect-ratio: 16 / 9; background: #000; }
+  .video-sidebar { display: flex; flex-direction: column; gap: 16px; }
+  .video-thumb { padding: 0; overflow: hidden; text-decoration: none; color: var(--text); display: flex; flex-direction: column; }
+  .video-thumb > .yt-box { aspect-ratio: 16 / 9; background: #000; }
+  @media (max-width: 900px) {
+    .video-featured { grid-template-columns: 1fr; }
+    .video-sidebar { flex-direction: row; overflow-x: auto; padding-bottom: 8px; }
+    .video-sidebar .video-thumb { min-width: 260px; }
+  }
+</style>
+
+<script src="assets/site.js"></script>
+</body>
+</html>
