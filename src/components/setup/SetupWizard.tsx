@@ -16,7 +16,7 @@ interface ToolStatus {
 }
 
 interface ToolCheck {
-  id: 'opencode' | 'ollama' | 'vllm';
+  id: 'omp' | 'opencode' | 'ollama' | 'vllm';
   label: string;
   required: boolean;
   description: string;
@@ -28,11 +28,22 @@ interface ToolCheck {
 
 const INITIAL_TOOLS: ToolCheck[] = [
   {
-    id: 'opencode',
-    label: 'OpenCode CLI',
+    id: 'omp',
+    label: 'OMP (oh-my-pi)',
     required: true,
     description:
-      'The agent runtime. Operon shells out to `opencode run` to execute every chat turn.',
+      'The default agent engine. Operon shells out to `omp --mode json -p ...` to execute every chat turn. Installs as a self-contained ~150MB binary to ~/.local/bin — no root, no Bun/Node needed at runtime.',
+    installable: true,
+    manualHint: 'Install manually: `curl -fsSL https://omp.sh/install | sh`',
+    docsUrl: 'https://github.com/can1357/oh-my-pi',
+    status: null,
+  },
+  {
+    id: 'opencode',
+    label: 'OpenCode CLI (optional, rollback engine)',
+    required: false,
+    description:
+      'The legacy agent runtime, kept for rollback. Set `agent_engine` to "opencode" in settings to shell out to `opencode run` instead of OMP.',
     installable: true,
     docsUrl: 'https://opencode.ai',
     status: null,
@@ -70,13 +81,15 @@ export function SetupWizard({ onComplete }: { onComplete: () => void }) {
   const refresh = useCallback(async () => {
     setChecking(true);
     try {
-      const [opencode, ollama, vllm] = await Promise.all([
+      const [omp, opencode, ollama, vllm] = await Promise.all([
+        invoke<ToolStatus>('check_omp'),
         invoke<ToolStatus>('check_opencode'),
         invoke<ToolStatus>('check_ollama'),
         invoke<ToolStatus>('check_vllm'),
       ]);
       setTools((prev) =>
         prev.map((t) => {
+          if (t.id === 'omp') return { ...t, status: omp };
           if (t.id === 'opencode') return { ...t, status: opencode };
           if (t.id === 'ollama') return { ...t, status: ollama };
           if (t.id === 'vllm') return { ...t, status: vllm };
@@ -92,11 +105,17 @@ export function SetupWizard({ onComplete }: { onComplete: () => void }) {
     void refresh();
   }, [refresh]);
 
-  const installOne = async (id: 'opencode' | 'ollama') => {
+  const installOne = async (id: 'omp' | 'opencode' | 'ollama') => {
     setInstalling(id);
     setInstallError(null);
     try {
-      await invoke<string>(id === 'opencode' ? 'install_opencode' : 'install_ollama');
+      const cmd =
+        id === 'omp'
+          ? 'install_omp'
+          : id === 'opencode'
+            ? 'install_opencode'
+            : 'install_ollama';
+      await invoke<string>(cmd);
       await refresh();
     } catch (e) {
       setInstallError(`${id}: ${String(e)}`);
@@ -116,9 +135,10 @@ export function SetupWizard({ onComplete }: { onComplete: () => void }) {
     }
   };
 
-  const opencodeInstalled = tools.find((t) => t.id === 'opencode')?.status?.installed ?? false;
-  // OpenCode is the only hard requirement. Ollama is recommended; vLLM is informational.
-  const canFinish = opencodeInstalled;
+  const ompInstalled = tools.find((t) => t.id === 'omp')?.status?.installed ?? false;
+  // OMP is the only hard requirement. OpenCode is the optional rollback engine;
+  // Ollama is recommended; vLLM is informational.
+  const canFinish = ompInstalled;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950 p-6">
@@ -193,7 +213,7 @@ export function SetupWizard({ onComplete }: { onComplete: () => void }) {
                     )}
                     {!installed && tool.installable && (
                       <button
-                        onClick={() => installOne(tool.id as 'opencode' | 'ollama')}
+                        onClick={() => installOne(tool.id as 'omp' | 'opencode' | 'ollama')}
                         disabled={isInstalling || installing !== null}
                         className="rounded bg-blue-600 hover:bg-blue-500 disabled:opacity-50 px-3 py-1.5 text-xs font-medium text-white transition-colors flex items-center gap-1.5"
                       >
@@ -236,7 +256,7 @@ export function SetupWizard({ onComplete }: { onComplete: () => void }) {
               className="rounded bg-green-600 hover:bg-green-500 disabled:bg-zinc-700 disabled:text-zinc-500 px-4 py-1.5 text-xs font-medium text-white transition-colors flex items-center gap-1.5"
             >
               {completing && <Loader2 className="h-3 w-3 animate-spin" />}
-              {canFinish ? 'Finish setup' : 'Install OpenCode to continue'}
+              {canFinish ? 'Finish setup' : 'Install OMP to continue'}
             </button>
           </div>
         </div>

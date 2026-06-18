@@ -499,6 +499,23 @@ export function SettingsPanel({ isOpen, onClose, initialSection }: SettingsPanel
             <div className="space-y-5">
               <h3 className="text-sm font-medium text-zinc-200">Agent Settings</h3>
 
+              <div>
+                <label className="flex items-center justify-between">
+                  <span className="text-sm text-zinc-400">Agent Engine</span>
+                  <select
+                    value={settings.agent_engine}
+                    onChange={(e) => saveSettings({ ...settings, agent_engine: e.target.value })}
+                    className="w-56 px-2 py-1 bg-zinc-800 border border-zinc-700 rounded text-sm text-zinc-100 outline-none"
+                  >
+                    <option value="omp">OMP (oh-my-pi)</option>
+                    <option value="opencode">OpenCode (legacy)</option>
+                  </select>
+                </label>
+                <p className="text-[11px] text-zinc-500 mt-1.5 leading-relaxed">
+                  OMP is a more autonomous multi-provider agent; OpenCode is kept for rollback.
+                </p>
+              </div>
+
               <label className="flex items-center justify-between">
                 <span className="text-sm text-zinc-400">Default Model</span>
                 <select

@@ -58,6 +58,12 @@ const sections: HelpSection[] = [
     iconColor: 'text-blue-400',
     items: [
       {
+        title: 'Installing OMP (the agent engine)',
+        content: 'Operon\'s default agent engine is OMP (oh-my-pi). The first-time setup wizard installs it for you, but you can also install it manually:\n\n    curl -fsSL https://omp.sh/install | sh\n\nThis drops a self-contained ~150MB binary into ~/.local/bin — no root, and no Bun/Node needed at runtime. It works on macOS (arm64/x64), Linux (x64/arm64), and Windows (x64). Operon runs it one-shot as `omp --mode json -p ...`, streaming JSONL events for each chat turn.\n\nOMP is OpenAI-compatible and multi-provider, so it works with the same backends described under AI Providers (Ollama, vLLM, LM Studio, OpenRouter, and any OpenAI-compatible endpoint).\n\nOpenCode is still bundled as an optional rollback engine — set `agent_engine` to "opencode" in settings to switch back.',
+        tip: 'OMP needs no Node or Bun at runtime — the install is a single static binary, which makes it easy to drop onto an HPC login node without admin rights.',
+        action: { label: 'Open Settings', view: 'settings' },
+      },
+      {
         title: 'Opening a project',
         content: 'Click "Open Folder" in the file explorer sidebar, or drag a folder onto the app window. Operon will set this as your working directory — the agent will be able to read, edit, and create files within it.',
         action: { label: 'Open Explorer', view: 'files' },
@@ -123,7 +129,7 @@ const sections: HelpSection[] = [
     items: [
       {
         title: 'Overview — picking a backend',
-        content: 'Operon\'s agent runtime is the OpenCode CLI. OpenCode speaks the OpenAI Chat Completions format (POST /v1/chat/completions), so any endpoint that exposes that API will work. Backends fall into two groups:\n\n1. Local runtimes — Ollama (default), LM Studio, vLLM. Run on your own machine or a GPU server. Best for privacy, cost control, and offline work.\n\n2. Cloud gateways — OpenRouter, LiteLLM, Groq, Together, DeepInfra. One key, hundreds of hosted models. Best for fast experimentation when outbound internet is allowed.\n\nThe out-of-the-box default is Ollama with `ollama/kimi-k2.6:cloud`. Switch in Settings → AI provider.',
+        content: 'Operon\'s default agent engine is OMP (oh-my-pi); OpenCode remains available as an optional rollback engine. Both speak the OpenAI Chat Completions format (POST /v1/chat/completions), so any endpoint that exposes that API will work. Backends fall into two groups:\n\n1. Local runtimes — Ollama (default), LM Studio, vLLM. Run on your own machine or a GPU server. Best for privacy, cost control, and offline work.\n\n2. Cloud gateways — OpenRouter, LiteLLM, Groq, Together, DeepInfra. One key, hundreds of hosted models. Best for fast experimentation when outbound internet is allowed.\n\nThe out-of-the-box default is Ollama with `ollama/kimi-k2.6:cloud`. Switch in Settings → AI provider.',
         tip: 'Agentic tool-use quality drops sharply below ~30B-parameter models. For serious coding work, prefer 70B+ local models or cloud-hosted ones like glm-5.1:cloud, deepseek-v3.1:cloud, or GPT-4-class models via OpenRouter.',
         action: { label: 'Open Settings', view: 'settings' },
       },
@@ -167,7 +173,7 @@ const sections: HelpSection[] = [
       },
       {
         title: 'Troubleshooting checklist',
-        content: 'When a custom endpoint isn\'t working, go through this list in order:\n\n1. Is the endpoint itself up?\n    curl -sS <base_url>/models          # should return JSON list\n    curl -sS <base_url>/chat/completions \\\n      -H "Content-Type: application/json" \\\n      -d \'{"model":"<id>","messages":[{"role":"user","content":"ping"}],"max_tokens":4}\'\n  If curl fails, fix the endpoint first — Operon can\'t help.\n\n2. Is a stale proxy env var interfering? Check:\n    env | grep -iE "proxy|no_proxy"\n    launchctl getenv HTTPS_PROXY  (macOS)\n    scutil --proxy                (macOS system proxy)\n  Unset anything suspicious and fully relaunch Operon.\n\n3. Is the model actually capable of tool use? Small local models (< 7B) often can\'t hold up in Agent mode. Drop to Ask mode to rule out model capability, or switch to a larger model.\n\n4. Tail the OpenCode log (~/.local/share/opencode/log/ on macOS/Linux) — most upstream API errors land there with the full request/response body.',
+        content: 'When a custom endpoint isn\'t working, go through this list in order:\n\n1. Is the endpoint itself up?\n    curl -sS <base_url>/models          # should return JSON list\n    curl -sS <base_url>/chat/completions \\\n      -H "Content-Type: application/json" \\\n      -d \'{"model":"<id>","messages":[{"role":"user","content":"ping"}],"max_tokens":4}\'\n  If curl fails, fix the endpoint first — Operon can\'t help.\n\n2. Is a stale proxy env var interfering? Check:\n    env | grep -iE "proxy|no_proxy"\n    launchctl getenv HTTPS_PROXY  (macOS)\n    scutil --proxy                (macOS system proxy)\n  Unset anything suspicious and fully relaunch Operon.\n\n3. Is the model actually capable of tool use? Small local models (< 7B) often can\'t hold up in Agent mode. Drop to Ask mode to rule out model capability, or switch to a larger model.\n\n4. Tail the agent engine log. For OMP (the default) check ~/.omp/agent/ for config and recent run logs; for the OpenCode rollback engine see ~/.local/share/opencode/log/ on macOS/Linux. Most upstream API errors land there with the full request/response body.',
       },
     ],
   },
@@ -185,7 +191,7 @@ const sections: HelpSection[] = [
       {
         title: 'Option A — Model on the remote server',
         content: 'Run the inference server on the remote itself; remote the agent talks to its own localhost.\n\nStep 1 — install runtime on the remote (Ollama example):\n    ssh user@server\n    curl -fsSL https://ollama.com/install.sh | sh\n    ollama serve >/tmp/ollama.log 2>&1 &\n    ollama signin                             # only if using :cloud models\n    ollama pull glm-5.1:cloud                 # or any local model\n    curl -sS http://localhost:11434/v1/models # verify\n\nOr vLLM for real GPU inference:\n    pip install vllm\n    vllm serve Qwen/Qwen2.5-Coder-32B-Instruct \\\n      --host 127.0.0.1 --port 8000 \\\n      --enable-auto-tool-choice --tool-call-parser hermes\n\nStep 2 — Operon setup:\n  1. SSH view → connect to the server.\n  2. Settings → AI provider → OpenAI-compatible.\n  3. Base URL: http://127.0.0.1:11434/v1 (or whichever port the remote uses). The URL is evaluated on the remote, so 127.0.0.1 means the remote itself.\n  4. Chat panel → switch mode to Remote → select server → pick model → send a message.',
-        tip: 'OpenCode talks to the OpenAI-compatible endpoint directly — no extra sidecar needed on the remote. Make sure the runtime (Ollama / vLLM / etc.) is reachable on 127.0.0.1 from the remote shell before starting a chat.',
+        tip: 'The agent engine (OMP by default) talks to the OpenAI-compatible endpoint directly — no extra sidecar needed on the remote. Make sure the runtime (Ollama / vLLM / etc.) is reachable on 127.0.0.1 from the remote shell before starting a chat.',
       },
       {
         title: 'Option B — Model on laptop, remote calls back via tunnel',
@@ -207,7 +213,7 @@ const sections: HelpSection[] = [
       },
       {
         title: 'Remote troubleshooting',
-        content: 'Before blaming Operon, check the stack from the inside out. SSH into the server and run:\n\n1. Is the model endpoint reachable from the remote itself?\n    curl -sS http://127.0.0.1:11434/v1/models\n  (Or whatever Base URL you configured.) If this fails on the remote but works on your laptop, you are using Option B without a tunnel — see the Option B item.\n\n2. Does the remote actually see the tunneled port (Option B)?\n    ss -ltnp | grep 11434         # Linux\n    lsof -iTCP:11434 -sTCP:LISTEN # macOS\n  Expect a sshd process listening. If nothing, the -R tunnel is down.\n\n3. Does the remote have outbound internet (Option C / :cloud models)?\n    curl -sS -o /dev/null -w "%{http_code}\\n" https://openrouter.ai/api/v1/models\n    curl -sS -o /dev/null -w "%{http_code}\\n" https://ollama.com\n\n4. Is OpenCode itself installed on the remote? Operon\'s setup wizard only installs runtimes locally. On the remote, run:\n    which opencode && opencode --version\n  If missing: curl -fsSL https://opencode.ai/install | bash.\n\n5. If all of the above look right but chat still fails, look at .operon-<id>.jsonl in your remote project directory — that\'s the raw stream-json output; error messages from the agent land there.',
+        content: 'Before blaming Operon, check the stack from the inside out. SSH into the server and run:\n\n1. Is the model endpoint reachable from the remote itself?\n    curl -sS http://127.0.0.1:11434/v1/models\n  (Or whatever Base URL you configured.) If this fails on the remote but works on your laptop, you are using Option B without a tunnel — see the Option B item.\n\n2. Does the remote actually see the tunneled port (Option B)?\n    ss -ltnp | grep 11434         # Linux\n    lsof -iTCP:11434 -sTCP:LISTEN # macOS\n  Expect a sshd process listening. If nothing, the -R tunnel is down.\n\n3. Does the remote have outbound internet (Option C / :cloud models)?\n    curl -sS -o /dev/null -w "%{http_code}\\n" https://openrouter.ai/api/v1/models\n    curl -sS -o /dev/null -w "%{http_code}\\n" https://ollama.com\n\n4. Is the agent engine itself installed on the remote? Operon\'s setup wizard only installs runtimes locally. On the remote, run:\n    which omp && omp --version       # default engine (OMP)\n  If missing: curl -fsSL https://omp.sh/install | sh (drops a self-contained binary into ~/.local/bin — no root). If you run the OpenCode rollback engine instead: which opencode && opencode --version, install with curl -fsSL https://opencode.ai/install | bash.\n  Note: the remote/HPC path has not yet been validated on a real cluster — confirm the Linux binary\'s glibc compatibility before relying on it for long jobs.\n\n5. If all of the above look right but chat still fails, look at .operon-<id>.jsonl in your remote project directory — that\'s the raw streamed JSONL output; error messages from the agent land there.',
       },
     ],
   },
@@ -770,7 +776,7 @@ export function HelpPanel({ isOpen, onClose, onNavigate }: HelpPanelProps) {
           {/* Footer */}
           <div className="px-4 py-2 border-t border-zinc-800">
             <p className="text-[10px] text-zinc-600 leading-relaxed">
-              Powered by OpenCode
+              Powered by OMP
             </p>
           </div>
         </div>

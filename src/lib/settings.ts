@@ -28,6 +28,9 @@ export interface AppSettings {
   ssh_tmux_session: string;
   /** First-run setup wizard completion flag. */
   setup_completed: boolean;
+  /** Which agent engine drives sessions. 'omp' is the default oh-my-pi
+   *  multi-provider agent; 'opencode' is kept for rollback. */
+  agent_engine: string;
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
@@ -50,6 +53,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   ssh_auto_tmux: true,
   ssh_tmux_session: 'operon-main',
   setup_completed: false,
+  agent_engine: 'omp',
 };
 
 export async function getSettings(): Promise<AppSettings> {
