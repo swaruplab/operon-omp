@@ -32,6 +32,12 @@ fn default_ssh_tmux_session() -> String {
     "operon-main".to_string()
 }
 
+fn default_agent_engine() -> String {
+    // Which harness adapter drives chat turns: "omp" (oh-my-pi, default) or
+    // "opencode" (legacy, kept for one-flag rollback). See src/harness/.
+    "omp".to_string()
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AppSettings {
     pub theme: String,
@@ -47,6 +53,9 @@ pub struct AppSettings {
     /// Permission level: "full_auto", "safe_mode", or "supervised"
     #[serde(default = "default_permission_mode")]
     pub permission_mode: String,
+    /// Agent engine adapter: "omp" (oh-my-pi, default) or "opencode" (legacy).
+    #[serde(default = "default_agent_engine")]
+    pub agent_engine: String,
     pub show_hidden_files: bool,
     pub terminal_font_size: u32,
     #[serde(default)]
@@ -89,6 +98,7 @@ impl Default for AppSettings {
             max_turns: 25,
             max_budget_usd: 5.0,
             permission_mode: "full_auto".to_string(),
+            agent_engine: default_agent_engine(),
             show_hidden_files: false,
             terminal_font_size: 13,
             mcp_servers: Vec::new(),

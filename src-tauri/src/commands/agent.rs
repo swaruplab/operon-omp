@@ -43,6 +43,11 @@ fn agent_shell() -> String {
 
 // --- Types ---
 
+/// Default engine for session files written before `agent_engine` existed.
+fn default_session_engine() -> String {
+    "omp".to_string()
+}
+
 /// Persistent metadata about an agent session, saved to ~/.operon/sessions/
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct SessionMetadata {
@@ -60,6 +65,10 @@ pub struct SessionMetadata {
     pub terminal_id: Option<String>, // Terminal ID if terminal mode
     #[serde(default)]
     pub name: Option<String>, // Human-readable session name (from first prompt)
+    /// Which engine drove this session ("omp" / "opencode"), so reconnect uses
+    /// the matching adapter even across app restarts.
+    #[serde(default = "default_session_engine")]
+    pub agent_engine: String,
 }
 
 /// Status of a session's output files on the filesystem
@@ -73,9 +82,11 @@ pub struct SessionFileStatus {
 }
 
 /// PATH prefix applied to every remote SSH command that invokes the agent.
-/// Covers known install locations so `opencode` is found regardless of shell or rc files.
+/// Covers known install locations so the engine binary (`omp` / `opencode`) is
+/// found regardless of shell or rc files. `~/.local/bin` is where `omp.sh`
+/// installs the self-contained OMP binary.
 const REMOTE_PATH_PREFIX: &str =
-    r#"export PATH="$HOME/.opencode/bin:$HOME/.local/bin:$HOME/.npm-global/bin:$PATH"; "#;
+    r#"export PATH="$HOME/.local/bin:$HOME/.omp/bin:$HOME/.opencode/bin:$HOME/.npm-global/bin:$PATH"; "#;
 
 pub struct AgentSession {
     pub child: tokio::process::Child,
@@ -298,9 +309,9 @@ pub async fn start_agent_session(
         }
     }
 
-    let mcp_servers = {
+    let (mcp_servers, agent_engine) = {
         let settings = settings_state.settings.lock().map_err(|e| e.to_string())?;
-        settings.mcp_servers.clone()
+        (settings.mcp_servers.clone(), settings.agent_engine.clone())
     };
 
     // Generate mcp-config.json — passed to the adapter as `--mcp-config`
@@ -308,24 +319,26 @@ pub async fn start_agent_session(
     // swapped for a remote one. `None` means the user has no MCP servers.
     let mcp_config_path = super::mcp::generate_mcp_config(&mcp_servers)?;
 
-    // --- Drop a default opencode.json if missing ---
-    // OpenCode auto-discovers `opencode.json` from the cwd, so this is how
-    // we pin the local Ollama provider + model on first run. Only generated
-    // for local sessions; remote sessions need the user to scp/edit a
-    // config on the remote (TODO).
+    // --- Build the harness adapter for the configured engine ---
+    let adapter = crate::harness::pick(&agent_engine);
+
+    // --- Drop a default engine config if missing (local sessions only) ---
+    // The adapter writes its engine's native config (OMP's
+    // ~/.omp/agent/{models,config}.yml + guardrail hook, or opencode.json),
+    // pinning the local provider + model on first run. Remote sessions expect a
+    // pre-placed config on the host (TODO: push it for remote too).
     if remote.is_none() {
         let model_for_config = model
             .clone()
             .unwrap_or_else(|| "ollama/kimi-k2.6:cloud".to_string());
-        match crate::harness::opencode::ensure_default_config(&project_path, &model_for_config) {
-            Ok(true) => eprintln!("[operon] generated opencode.json for first-run"),
+        match adapter.ensure_local_config(&project_path, &model_for_config) {
+            Ok(true) => eprintln!("[operon] generated {} config for first-run", adapter.id()),
             Ok(false) => {}
-            Err(e) => eprintln!("[operon] could not write opencode.json: {}", e),
+            Err(e) => eprintln!("[operon] could not write {} config: {}", adapter.id(), e),
         }
     }
 
     // --- Build the CLI invocation via the harness adapter ---
-    let adapter = crate::harness::pick();
     let build_out = adapter.build_command(&crate::harness::BuildContext {
         prompt: &prompt,
         project_path: &project_path,
@@ -390,6 +403,7 @@ pub async fn start_agent_session(
         use_terminal,
         terminal_id: terminal_id.clone(),
         name: Some(session_name),
+        agent_engine: agent_engine.clone(),
     };
     let _ = save_session_to_disk(&meta);
 
@@ -677,8 +691,9 @@ pub async fn start_agent_session(
             // Stream stdout (JSON lines from the output file)
             let app_handle = app.clone();
             let sid = session_id.clone();
+            let engine = agent_engine.clone();
                     tokio::spawn(async move {
-                let adapter = crate::harness::pick();
+                let adapter = crate::harness::pick(&engine);
                 let reader = BufReader::new(stdout);
                 let mut lines = reader.lines();
                 while let Ok(Some(line)) = lines.next_line().await {
@@ -780,21 +795,24 @@ pub async fn start_agent_session(
 
         // Step 1: Figure out how to invoke opencode on the remote server.
         // It might be a binary in PATH or installed at a common location.
-        let find_agent_cmd = r#"
+        let bin = adapter.remote_bin_name();
+        let find_agent_cmd = format!(
+            r#"
             # 1. Check for a real binary at common install locations
             for p in \
-                "$HOME/.local/bin/opencode" \
-                "$HOME/.opencode/bin/opencode" \
-                "$HOME/.npm-global/bin/opencode" \
-                "$HOME/.npm/bin/opencode" \
-                "$HOME/bin/opencode" \
-                "$HOME/.yarn/bin/opencode" \
-                "$HOME/.bun/bin/opencode" \
-                /usr/local/bin/opencode; do
+                "$HOME/.local/bin/{bin}" \
+                "$HOME/.omp/bin/{bin}" \
+                "$HOME/.opencode/bin/{bin}" \
+                "$HOME/.npm-global/bin/{bin}" \
+                "$HOME/.npm/bin/{bin}" \
+                "$HOME/bin/{bin}" \
+                "$HOME/.yarn/bin/{bin}" \
+                "$HOME/.bun/bin/{bin}" \
+                /usr/local/bin/{bin}; do
                 [ -x "$p" ] && echo "$p" && exit 0
             done
             # Check NVM paths
-            for p in "$HOME"/.nvm/versions/node/*/bin/opencode; do
+            for p in "$HOME"/.nvm/versions/node/*/bin/{bin}; do
                 [ -x "$p" ] && echo "$p" && exit 0
             done
 
@@ -807,22 +825,26 @@ pub async fn start_agent_session(
             . "$HOME/.bashrc" 2>/dev/null
             . "$HOME/.nvm/nvm.sh" 2>/dev/null
 
-            # 3. Check if opencode is a real binary via which
-            w=$(which opencode 2>/dev/null)
+            # 3. Check if it's a real binary via which
+            w=$(which {bin} 2>/dev/null)
             if [ -n "$w" ] && [ -x "$w" ]; then
                 echo "$w"
                 exit 0
             fi
 
             echo ""
-        "#;
-        let agent_resolve = super::ssh::ssh_exec(&profile, find_agent_cmd).unwrap_or_default();
+        "#,
+            bin = bin
+        );
+        let agent_resolve = super::ssh::ssh_exec(&profile, &find_agent_cmd).unwrap_or_default();
         let agent_resolve = agent_resolve.trim().to_string();
 
         if agent_resolve.is_empty() || agent_resolve.contains("not found") {
-            return Err("OpenCode CLI not found on the remote server. \
-                        Install it with: curl -fsSL https://opencode.ai/install | bash"
-                .to_string());
+            return Err(format!(
+                "{} CLI not found on the remote server. Install it with: {}",
+                adapter.remote_bin_name(),
+                adapter.install_hint()
+            ));
         }
 
         // Step 2: Replace `opencode` with the resolved absolute path
@@ -889,7 +911,11 @@ pub async fn start_agent_session(
             }
         }
 
-        let agent_cmd_abs = agent_cmd.replacen("opencode ", &format!("{} ", agent_invoke), 1);
+        let agent_cmd_abs = agent_cmd.replacen(
+            &format!("{} ", adapter.remote_bin_name()),
+            &format!("{} ", agent_invoke),
+            1,
+        );
 
         // Step 3: Build the remote command — source profile for PATH
         // then cd to the working directory and run opencode.
@@ -977,8 +1003,9 @@ pub async fn start_agent_session(
     let output_jsonl_path = format!("{}/.operon-{}.jsonl", project_path, session_id);
     let done_marker_path = format!("{}/.operon-{}.done", project_path, session_id);
 
+    let engine = agent_engine.clone();
     tokio::spawn(async move {
-        let adapter = crate::harness::pick();
+        let adapter = crate::harness::pick(&engine);
         let reader = BufReader::new(stdout);
         let mut lines = reader.lines();
 
@@ -1550,8 +1577,9 @@ pub async fn reconnect_session(
         // Remote `.jsonl` is the raw agent output, so we still translate.
         let app_handle = app.clone();
         let sid = event_session_id.clone();
+        let engine = meta.agent_engine.clone();
             tokio::spawn(async move {
-            let adapter = crate::harness::pick();
+            let adapter = crate::harness::pick(&engine);
             let reader = BufReader::new(stdout);
             let mut lines = reader.lines();
             while let Ok(Some(line)) = lines.next_line().await {
@@ -1689,8 +1717,13 @@ pub async fn reconnect_tail(
     //    re-sent lines gracefully (same message ID = replace, not duplicate).
     let app_handle = app.clone();
     let sid = session_id.clone();
+    let engine = load_session_from_disk(&session_id)
+        .ok()
+        .flatten()
+        .map(|m| m.agent_engine)
+        .unwrap_or_else(default_session_engine);
     tokio::spawn(async move {
-        let adapter = crate::harness::pick();
+        let adapter = crate::harness::pick(&engine);
         let reader = BufReader::new(stdout);
         let mut lines = reader.lines();
         while let Ok(Some(line)) = lines.next_line().await {

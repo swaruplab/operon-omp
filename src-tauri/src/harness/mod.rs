@@ -11,15 +11,23 @@
 //! 3. Declaring which optional features it supports (`capabilities`) so the
 //!    UI can grey out unsupported toggles.
 //!
-//! Operon Enterprise is OpenCode-only. The `pick()` helper is kept as the
-//! single construction point so future adapters (Codex CLI, Aider, …) can
-//! plug in without touching `start_agent_session`.
+//! Operon-OMP ships OMP (oh-my-pi) as the default engine, with OpenCode kept
+//! behind the `agent_engine` setting for one-flag rollback. The `pick()` helper
+//! is the single construction point so adapters plug in without touching
+//! `start_agent_session`; engine-specific concerns that live OUTSIDE the trait
+//! (remote binary name, install hint, local config bootstrap) are exposed as
+//! trait methods so the caller never hardcodes an engine.
 
+pub mod omp;
 pub mod opencode;
 
-/// Pick a harness adapter. Operon Enterprise currently only ships OpenCode.
-pub fn pick() -> Box<dyn HarnessAdapter> {
-    Box::new(opencode::OpenCodeAdapter::new())
+/// Pick a harness adapter for the configured engine. Defaults to OMP (oh-my-pi);
+/// `"opencode"` selects the legacy OpenCode adapter, kept for one-flag rollback.
+pub fn pick(engine: &str) -> Box<dyn HarnessAdapter> {
+    match engine {
+        "opencode" => Box::new(opencode::OpenCodeAdapter::new()),
+        _ => Box::new(omp::OmpAdapter::new()),
+    }
 }
 
 use std::path::PathBuf;
@@ -94,4 +102,21 @@ pub trait HarnessAdapter: Send + Sync {
     fn normalize_line(&self, raw: &str) -> Option<String>;
 
     fn capabilities(&self) -> Capabilities;
+
+    /// The binary name to probe/resolve on a remote host, and the leading bare
+    /// token of `build_command`'s output (the caller absolutizes it for remote
+    /// runs). Defaults to `id()`.
+    fn remote_bin_name(&self) -> &'static str {
+        self.id()
+    }
+
+    /// Human-facing hint for installing the engine on a remote host when the
+    /// binary can't be found.
+    fn install_hint(&self) -> &'static str;
+
+    /// Write a default local engine config (provider/model, roles, guardrails)
+    /// into the appropriate location if one doesn't already exist. Returns
+    /// `Ok(true)` if anything was written, `Ok(false)` if it already existed.
+    /// Called only for local sessions (remote config is pre-placed on the host).
+    fn ensure_local_config(&self, project_path: &str, model: &str) -> Result<bool, String>;
 }

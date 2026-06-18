@@ -119,6 +119,14 @@ impl HarnessAdapter for OpenCodeAdapter {
         }
     }
 
+    fn install_hint(&self) -> &'static str {
+        "curl -fsSL https://opencode.ai/install | bash"
+    }
+
+    fn ensure_local_config(&self, project_path: &str, model: &str) -> Result<bool, String> {
+        ensure_default_config(project_path, model)
+    }
+
     fn build_command(&self, ctx: &BuildContext<'_>) -> Result<BuildOutput, String> {
         let escaped_prompt = ctx.prompt.replace('\'', "'\\''");
 
